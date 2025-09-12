@@ -3,8 +3,8 @@ import Dashboard from "./pages/Dashboard";
 import Branches from "./pages/Branches";
 import Sales from "./pages/Sales";
 import TopFlavors from "./pages/TopFlavors";
-import IngredientRequests from "./pages/IngredientRequests";
-import AdminPanel from "./pages/AdminPanel";
+import IngredientsPage from "./pages/Ingredients.jsx";
+import AdminPage from "./pages/AdminPanel.jsx";
 
 function App() {
   return (
@@ -27,8 +27,8 @@ function App() {
           <Route path="/branches" element={<Branches />} />
           <Route path="/sales" element={<Sales />} />
           <Route path="/top-flavors" element={<TopFlavors />} />
-          <Route path="/ingredients" element={<IngredientRequests />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/ingredients" element={<IngredientsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
     </div>

@@ -3,11 +3,14 @@ import mongoose from "mongoose";
 const saleSchema = new mongoose.Schema({
   branch: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch", // must match your Branch model name
+    ref: "Branch",
     required: true,
   },
   flavor: { type: String, required: true },
   unitsSold: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("Sale", saleSchema);
+const Sale = mongoose.model("Sale", saleSchema);
+
+export default Sale;

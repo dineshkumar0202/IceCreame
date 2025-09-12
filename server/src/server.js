@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import { PORT, MONGO_URI } from "./config.js";
 import branchRoutes from "./routes/branches.js";
-import saleRoutes from "./routes/sales.js";
+import salesRoutes from "./routes/sales.js";
 import ingredientRoutes from "./routes/ingredients.js";
 import dashboardRoutes from "./routes/dashboard.js";
 
@@ -16,7 +16,7 @@ app.use(express.json());
 
 // 🔑 Mount the route
 app.use("/api/branches", branchRoutes);
-app.use("/api/sales", saleRoutes);
+app.use("/api/sales", salesRoutes);
 app.use("/api/ingredients", ingredientRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 

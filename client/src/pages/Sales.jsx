@@ -1,70 +1,100 @@
-import { useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 
-function Sales() {
-  const [form, setForm] = useState({
-    branch: "",
-    flavor: "",
-    unitsSold: "",
-  });
-  const [message, setMessage] = useState("");
+export default function SalesPage() {
+  const [sales, setSales] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [branch, setBranch] = useState("");
+  const [flavor, setFlavor] = useState("");
+  const [unitsSold, setUnitsSold] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Fetch sales
+  const fetchSales = async () => {
+    const res = await fetch("http://localhost:5000/api/sales");
+    const data = await res.json();
+    setSales(data);
   };
 
-  const handleSubmit = async (e) => {
+  // Fetch branches for dropdown
+  const fetchBranches = async () => {
+    const res = await fetch("http://localhost:5000/api/branches");
+    const data = await res.json();
+    setBranches(data);
+  };
+
+  useEffect(() => {
+    fetchSales();
+    fetchBranches();
+  }, []);
+
+  // Add sale
+  const handleAddSale = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:5000/api/sales", form);
-      setMessage(res.data.message || "Sale added successfully!");
-      setForm({ branch: "", flavor: "", unitsSold: "" });
-    } catch (err) {
-      setMessage(err.response?.data?.message || "Error adding sale");
-    }
+    const res = await fetch("http://localhost:5000/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ branch, flavor, unitsSold }),
+    });
+    const data = await res.json();
+    alert(data.message);
+    fetchSales();
+    setBranch("");
+    setFlavor("");
+    setUnitsSold("");
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">➕ Add Sale</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="branch"
-          placeholder="Branch ID"
-          value={form.branch}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">📊 Manage Sales</h2>
+
+      <form onSubmit={handleAddSale} className="mb-6 space-y-2">
+        <select
+          value={branch}
+          onChange={(e) => setBranch(e.target.value)}
+          className="border p-2 w-full rounded"
           required
-        />
+        >
+          <option value="">Select Branch</option>
+          {branches.map((b) => (
+            <option key={b._id} value={b._id}>
+              {b.name} ({b.city})
+            </option>
+          ))}
+        </select>
+
         <input
           type="text"
-          name="flavor"
           placeholder="Flavor"
-          value={form.flavor}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
+          value={flavor}
+          onChange={(e) => setFlavor(e.target.value)}
+          className="border p-2 w-full rounded"
           required
         />
+
         <input
           type="number"
-          name="unitsSold"
           placeholder="Units Sold"
-          value={form.unitsSold}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
+          value={unitsSold}
+          onChange={(e) => setUnitsSold(e.target.value)}
+          className="border p-2 w-full rounded"
           required
         />
+
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Save Sale
+          ➕ Add Sale
         </button>
       </form>
-      {message && <p className="mt-4 text-green-600">{message}</p>}
+
+      <h3 className="text-lg font-semibold mb-2">All Sales</h3>
+      <ul className="space-y-1">
+        {sales.map((s) => (
+          <li key={s._id} className="border p-2 rounded">
+            {s.branch?.name} ({s.branch?.city}) → {s.flavor} ({s.unitsSold} units)
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
-
-export default Sales;

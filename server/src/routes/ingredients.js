@@ -1,16 +1,16 @@
 import express from "express";
 import {
-  createIngredientDemand,
-  getIngredientDemands,
-  updateIngredientDemand,
-  deleteIngredientDemand,
+  createRequest,
+  getRequests,
+  approveRequest,
+  rejectRequest,
 } from "../controllers/ingredientController.js";
 
 const router = express.Router();
 
-router.post("/", createIngredientDemand); // Create new demand
-router.get("/", getIngredientDemands); // Get all demands
-router.put("/:id", updateIngredientDemand); // Update demand by ID
-router.delete("/:id", deleteIngredientDemand); // Delete demand by ID
+router.post("/", createRequest);
+router.get("/", getRequests);
+router.patch("/:id/approve", approveRequest);
+router.patch("/:id/reject", rejectRequest);
 
 export default router;

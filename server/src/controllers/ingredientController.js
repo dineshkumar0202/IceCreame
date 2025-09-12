@@ -1,75 +1,73 @@
-import IngredientDemand from "../models/IngredientDemand.js";
+import IngredientRequest from "../models/IngredientDemand.js";
 
-// ✅ Create Ingredient Request
-export const createIngredientDemand = async (req, res) => {
+// ✅ Create new ingredient request
+export const createRequest = async (req, res) => {
   try {
-    const { branch, flavor, ingredient, qtyNeeded } = req.body;
+    const { branch, flavor, ingredient, qty } = req.body;
 
-    if (!branch || !flavor || !ingredient || !qtyNeeded) {
+    if (!branch || !flavor || !ingredient || !qty) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const demand = await IngredientDemand.create({
+    const request = await IngredientRequest.create({
       branch,
       flavor,
       ingredient,
-      qtyNeeded,
+      qty,
     });
 
-    return res.status(201).json({
-      message: "Ingredient demand created successfully",
-      demand,
+    res.status(201).json({
+      message: "Ingredient request created successfully",
+      request,
     });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-// ✅ Get All Ingredient Demands
-export const getIngredientDemands = async (req, res) => {
+// ✅ Get all ingredient requests
+export const getRequests = async (req, res) => {
   try {
-    const demands = await IngredientDemand.find().populate("branch");
-    return res.json(demands);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    const requests = await IngredientRequest.find().populate("branch");
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
 
-// ✅ Update Ingredient Demand
-export const updateIngredientDemand = async (req, res) => {
+// Approve ingredient request
+export const approveRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { branch, flavor, ingredient, qtyNeeded } = req.body;
-
-    const demand = await IngredientDemand.findByIdAndUpdate(
+    const request = await IngredientRequest.findByIdAndUpdate(
       id,
-      { branch, flavor, ingredient, qtyNeeded },
+      { status: "approved" },
       { new: true }
     );
-
-    if (!demand) {
-      return res.status(404).json({ message: "Demand not found" });
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
     }
-
-    return res.json({ message: "Demand updated successfully", demand });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.json({ message: "Request approved", request });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
-// ✅ Delete Ingredient Demand
-export const deleteIngredientDemand = async (req, res) => {
+
+// Reject ingredient request
+export const rejectRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const demand = await IngredientDemand.findByIdAndDelete(id);
-
-    if (!demand) {
-      return res.status(404).json({ message: "Demand not found" });
+    const request = await IngredientRequest.findByIdAndUpdate(
+      id,
+      { status: "rejected" },
+      { new: true }
+    );
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
     }
-
-    return res.json({ message: "Demand deleted successfully" });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.json({ message: "Request rejected", request });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
-
