@@ -1,73 +1,46 @@
-import IngredientRequest from "../models/IngredientDemand.js";
+const Req = require('../models/IngredientRequest');
 
-// ✅ Create new ingredient request
-export const createRequest = async (req, res) => {
+exports.request = async (req, res) => {
   try {
-    const { branch, flavor, ingredient, qty } = req.body;
-
-    if (!branch || !flavor || !ingredient || !qty) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const request = await IngredientRequest.create({
-      branch,
-      flavor,
-      ingredient,
-      qty,
-    });
-
-    res.status(201).json({
-      message: "Ingredient request created successfully",
-      request,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const request = new Req(req.body);
+    await request.save();
+    res.json(request);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating ingredient request' });
   }
 };
 
-// ✅ Get all ingredient requests
-export const getRequests = async (req, res) => {
+exports.list = async (req, res) => {
   try {
-    const requests = await IngredientRequest.find().populate("branch");
+    const requests = await Req.find();
     res.json(requests);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching ingredient requests' });
   }
 };
 
-
-// Approve ingredient request
-export const approveRequest = async (req, res) => {
+exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const request = await IngredientRequest.findByIdAndUpdate(
-      id,
-      { status: "approved" },
-      { new: true }
-    );
+    const request = await Req.findByIdAndUpdate(id, req.body, { new: true });
     if (!request) {
-      return res.status(404).json({ message: "Request not found" });
+      return res.status(404).json({ message: 'Ingredient request not found' });
     }
-    res.json({ message: "Request approved", request });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json(request);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating ingredient request' });
   }
 };
 
-// Reject ingredient request
-export const rejectRequest = async (req, res) => {
+exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
-    const request = await IngredientRequest.findByIdAndUpdate(
-      id,
-      { status: "rejected" },
-      { new: true }
-    );
+    const request = await Req.findByIdAndDelete(id);
     if (!request) {
-      return res.status(404).json({ message: "Request not found" });
+      return res.status(404).json({ message: 'Ingredient request not found' });
     }
-    res.json({ message: "Request rejected", request });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json({ message: 'Ingredient request deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting ingredient request' });
   }
 };

@@ -1,37 +1,23 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import { PORT, MONGO_URI } from "./config.js";
-import branchRoutes from "./routes/branches.js";
-import salesRoutes from "./routes/sales.js";
-import ingredientRoutes from "./routes/ingredients.js";
-import dashboardRoutes from "./routes/dashboard.js";
+require('dotenv').config({ path: __dirname + '/../.env' }); // must be first
+
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./config/db');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/branches', require('./routes/branches'));
+app.use('/api/sales', require('./routes/sales'));
+app.use('/api/ingredients', require('./routes/ingredients'));
+app.use('/api/dashboard', require('./routes/dashboard'));
 
-// 🔑 Mount the route
-app.use("/api/branches", branchRoutes);
-app.use("/api/sales", salesRoutes);
-app.use("/api/ingredients", ingredientRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+// Connect DB
+connectDB();
 
-
-// Test route
-app.get("/", (req, res) => {
-  res.send("🍦 Ice Cream Running!");
-});
-
-
-// DB connect + start
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    app.listen(PORT, () =>
-      console.log(`✅ Server running on localhost:${PORT}`)
-    );
-  })
-  .catch((err) => console.error("❌ DB connection error:", err));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log('🟢 Server running on', PORT));

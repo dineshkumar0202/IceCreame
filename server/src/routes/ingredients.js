@@ -1,16 +1,10 @@
-import express from "express";
-import {
-  createRequest,
-  getRequests,
-  approveRequest,
-  rejectRequest,
-} from "../controllers/ingredientController.js";
+const r = require('express').Router();
+const ctrl = require('../controllers/ingredientController');
+const auth = require('../middleware/authMiddleware');
 
-const router = express.Router();
+r.get('/', auth(), ctrl.list);
+r.post('/', auth(['admin']), ctrl.request);
+r.put('/:id', auth(['admin']), ctrl.update);
+r.delete('/:id', auth(['admin']), ctrl.delete);
 
-router.post("/", createRequest);
-router.get("/", getRequests);
-router.patch("/:id/approve", approveRequest);
-router.patch("/:id/reject", rejectRequest);
-
-export default router;
+module.exports = r;

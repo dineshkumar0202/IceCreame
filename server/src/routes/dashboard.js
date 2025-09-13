@@ -1,9 +1,1 @@
-import express from "express";
-import { getDashboardSummary, getTopFlavorPerCity } from "../controllers/dashboardController.js";
-
-const router = express.Router();
-
-router.get("/summary", getDashboardSummary);   // Homepage summary
-router.get("/top-flavors", getTopFlavorPerCity); // Top flavor per city
-
-export default router;
+const r=require('express').Router(); const ctrl=require('../controllers/dashboardController'); const auth=require('../middleware/authMiddleware'); r.get('/totals', auth(), ctrl.totals); r.get('/top-flavor', auth(), ctrl.topFlavorByCity); r.get('/top-flavors', auth(), ctrl.topFlavors); module.exports=r;

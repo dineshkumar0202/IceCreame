@@ -1,38 +1,72 @@
-import { Routes, Route, Link } from "react-router-dom";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminHome from "./pages/AdminHome";
+import UserHome from "./pages/UserHome";
 import Dashboard from "./pages/Dashboard";
 import Branches from "./pages/Branches";
 import Sales from "./pages/Sales";
-import TopFlavors from "./pages/TopFlavors";
-import IngredientsPage from "./pages/Ingredients.jsx";
-import AdminPage from "./pages/AdminPanel.jsx";
+import Ingredients from "./pages/Ingredients";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 
-function App() {
+export default function App() {
+  const { user } = useAuth();
+
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <nav className="w-64 min-h-screen bg-gray-800 text-white p-4">
-        <h2 className="text-xl font-bold mb-6">🍦 Ice Cream</h2>
-        <ul className="space-y-4">
-          <li><Link to="/" className="hover:underline">Dashboard</Link></li>
-          <li><Link to="/branches" className="hover:underline">Branches</Link></li>
-          <li><Link to="/sales" className="hover:underline">Sales</Link></li>
-          <li><Link to="/top-flavors" className="hover:underline">Top Flavors</Link></li>
-        </ul>
-      </nav>
-
-      {/* Page Content */}
-      <main className="flex-1 p-6">
+    <div className="h-screen flex flex-col overflow-hidden">
+      {user && <Navbar />}
+      <div className="flex-1 overflow-hidden">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/branches" element={<Branches />} />
-          <Route path="/sales" element={<Sales />} />
-          <Route path="/top-flavors" element={<TopFlavors />} />
-          <Route path="/ingredients" element={<IngredientsPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                {user?.role === 'admin' ? <AdminHome /> : <UserHome />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/branches"
+            element={
+              <ProtectedRoute>
+                <Branches />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales"
+            element={
+              <ProtectedRoute>
+                <Sales />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ingredients"
+            element={
+              <ProtectedRoute>
+                <Ingredients />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/login" 
+            element={user ? <Navigate to="/" replace /> : <Login />} 
+          />
+          <Route path="*" element={<NotFound />} />
         </Routes>
-      </main>
+      </div>
     </div>
   );
 }
-
-export default App;
