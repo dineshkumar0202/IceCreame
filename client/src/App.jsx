@@ -3,12 +3,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminHome from "./pages/AdminHome";
+import AdminHome from "./pages/AdminHome.jsx";
 import UserHome from "./pages/UserHome";
 import Dashboard from "./pages/Dashboard";
 import Branches from "./pages/Branches";
 import Sales from "./pages/Sales";
-import Ingredients from "./pages/Ingredients";
+import Ingredients from "./pages/Ingredients.jsx";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
