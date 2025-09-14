@@ -7,7 +7,7 @@ import { getSales } from "../services/salesService";
 import { getRequests } from "../services/ingredientService";
 import Chart from "../components/Chart";
 
-export default function AdminHome() {
+export default function AdminPage () {
   const { user } = useAuth();
   const [totals, setTotals] = useState({
     totalOutlets: 0,
