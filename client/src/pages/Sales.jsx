@@ -109,7 +109,7 @@ export default function Sales() {
 
       {/* Add Sale Form - Admin Only */}
       {showForm && user?.role === 'admin' && (
-        <div className="bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
+         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">Add New Sale</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,6 +205,48 @@ export default function Sales() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+      
+      {/* Sales Analytics - Admin Only */}
+      {user?.role === 'admin' && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm font-medium">Total Sales</p>
+                <p className="text-3xl font-bold">₹{filteredSales.reduce((sum, sale) => sum + sale.amount, 0).toLocaleString()}</p>
+              </div>
+              <div className="text-4xl opacity-80">💰</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Total Units</p>
+                <p className="text-3xl font-bold">{filteredSales.reduce((sum, sale) => sum + sale.units, 0)}</p>
+              </div>
+              <div className="text-4xl opacity-80">📦</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Active Branches</p>
+                <p className="text-3xl font-bold">{new Set(filteredSales.map(sale => sale.branch)).size}</p>
+              </div>
+              <div className="text-4xl opacity-80">🏪</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-rose-500 to-rose-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-rose-100 text-sm font-medium">Avg Sale</p>
+                <p className="text-3xl font-bold">₹{filteredSales.length > 0 ? Math.round(filteredSales.reduce((sum, sale) => sum + sale.amount, 0) / filteredSales.length) : 0}</p>
+              </div>
+              <div className="text-4xl opacity-80">📊</div>
+            </div>
+          </div>
         </div>
       )}
 

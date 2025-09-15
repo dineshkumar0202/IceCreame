@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import { getTotals, getTopFlavors } from "../services/dashboardService";
@@ -7,8 +8,9 @@ import { getSales } from "../services/salesService";
 import { getRequests } from "../services/ingredientService";
 import Chart from "../components/Chart";
 
-export default function AdminPage () {
+export default function AdminPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [totals, setTotals] = useState({
     totalOutlets: 0,
     totalSales: { totalUnits: 0, totalAmount: 0 },
@@ -26,22 +28,21 @@ export default function AdminPage () {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const [totalsData, topFlavors, branchesData, salesData, requestsData] = await Promise.all([
-        getTotals(),
-        getTopFlavors(),
-        getBranches(),
-        getSales(),
-        getRequests()
-      ]);
-      
+      const [totalsData, topFlavors, branchesData, salesData, requestsData] =
+        await Promise.all([
+          getTotals(),
+          getTopFlavors(),
+          getBranches(),
+          getSales(),
+          getRequests(),
+        ]);
+
       setTotals(totalsData);
       setTop(
-        topFlavors
-          .slice(0, 10)
-          .map((x) => ({
-            name: x._id.city + " - " + x._id.flavor,
-            value: x.units,
-          }))
+        topFlavors.slice(0, 10).map((x) => ({
+          name: x._id.city + " - " + x._id.flavor,
+          value: x.units,
+        }))
       );
       setBranches(branchesData);
       setRecentSales(salesData.slice(0, 5));
@@ -91,8 +92,12 @@ export default function AdminPage () {
         <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300 animate-bounceIn delay-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-pink-100 text-sm font-medium">Total Units Sold</p>
-              <p className="text-3xl font-bold">{totals.totalSales.totalUnits}</p>
+              <p className="text-pink-100 text-sm font-medium">
+                Total Units Sold
+              </p>
+              <p className="text-3xl font-bold">
+                {totals.totalSales.totalUnits}
+              </p>
             </div>
             <div className="text-4xl opacity-80">📦</div>
           </div>
@@ -102,7 +107,9 @@ export default function AdminPage () {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-rose-100 text-sm font-medium">Total Revenue</p>
-              <p className="text-3xl font-bold">₹{totals.totalSales.totalAmount.toLocaleString()}</p>
+              <p className="text-3xl font-bold">
+                ₹{totals.totalSales.totalAmount.toLocaleString()}
+              </p>
             </div>
             <div className="text-4xl opacity-80">💰</div>
           </div>
@@ -112,7 +119,9 @@ export default function AdminPage () {
       {/* Chart Section */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-700">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Top Flavors Across Cities</h3>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Top Flavors Across Cities
+          </h3>
           <div className="text-2xl">🍦</div>
         </div>
         <div className="h-96">
@@ -126,15 +135,25 @@ export default function AdminPage () {
           Quick Actions <span className="text-2xl animate-bounce ml-2">🍦</span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="bg-rose-500 hover:bg-rose-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-900">
+          <button
+            onClick={() => navigate("/branches")}
+            className="bg-rose-500 hover:bg-rose-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-900"
+          >
             <div className="text-2xl mb-2">🏪</div>
             <div>Manage Branches</div>
           </button>
-          <button className="bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1000">
+
+          <button
+            onClick={() => navigate("/sales")}
+            className="bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1000"
+          >
             <div className="text-2xl mb-2">💰</div>
             <div>View Sales</div>
           </button>
-          <button className="bg-rose-600 hover:bg-rose-700 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1100">
+          <button
+            onClick={() => navigate("/ingredients")}
+            className="bg-rose-600 hover:bg-rose-700 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1100"
+          >
             <div className="text-2xl mb-2">🥛</div>
             <div>Manage Ingredients</div>
           </button>
@@ -145,9 +164,17 @@ export default function AdminPage () {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Sales */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-1200">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            Recent Sales <span className="text-xl animate-bounce ml-2">💰</span>
-          </h3>
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              Recent Sales <span className="text-xl animate-bounce ml-2">💰</span>
+            </h3>
+            <button 
+              onClick={() => navigate('/sales')}
+              className="text-sm text-rose-600 hover:text-rose-700 font-medium transition-colors duration-200"
+            >
+              View All →
+            </button>
+          </div>
           <div className="space-y-3">
             {recentSales.map((sale, index) => (
               <div
@@ -160,13 +187,21 @@ export default function AdminPage () {
                     {sale.flavor.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white text-sm">{sale.flavor}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{sale.branch}</p>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      {sale.flavor}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {sale.branch}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-green-600 dark:text-green-400 text-sm">₹{sale.amount}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{sale.units} units</p>
+                  <p className="font-bold text-green-600 dark:text-green-400 text-sm">
+                    ₹{sale.amount}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {sale.units} units
+                  </p>
                 </div>
               </div>
             ))}
@@ -174,10 +209,17 @@ export default function AdminPage () {
         </div>
 
         {/* Recent Requests */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-1300">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            Recent Requests <span className="text-xl animate-bounce ml-2">🥛</span>
-          </h3>
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              Recent Requests <span className="text-xl animate-bounce ml-2">🥛</span>
+            </h3>
+            <button 
+              onClick={() => navigate('/ingredients')}
+              className="text-sm text-rose-600 hover:text-rose-700 font-medium transition-colors duration-200"
+            >
+              View All →
+            </button>
+          </div>
           <div className="space-y-3">
             {recentRequests.map((request, index) => (
               <div
@@ -190,25 +232,35 @@ export default function AdminPage () {
                     {request.ingredient.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white text-sm">{request.ingredient}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{request.branch}</p>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      {request.ingredient}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {request.branch}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    request.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                    request.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      request.status === "approved"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : request.status === "rejected"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                    }`}
+                  >
                     {request.status}
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{request.qty} units</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {request.qty} units
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </div>
+
   );
 }
