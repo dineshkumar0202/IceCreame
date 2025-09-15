@@ -313,16 +313,7 @@ export default function Branches() {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">
-              {branch.address && (
-                <p className="text-sm text-gray-500">{branch.address}</p>
-              )}
-              {(branch.phone || branch.manager) && (
-                <p className="text-sm text-gray-500">
-                  {branch.manager && `Manager: ${branch.manager}`}
-                  {branch.manager && branch.phone && " • "}
-                  {branch.phone && `Phone: ${branch.phone}`}
-                </p>
-              )}
+              {user?.role === "admin" ? "All Branches" : `Your Branch: ${user?.branch}`}
             </h3>
           </div>
 
@@ -362,6 +353,16 @@ export default function Branches() {
                         <p className="text-gray-600">
                           {branch.city} - {branch.area}
                         </p>
+                        {branch.address && (
+                          <p className="text-sm text-gray-500">{branch.address}</p>
+                        )}
+                        {(branch.phone || branch.manager) && (
+                          <p className="text-sm text-gray-500">
+                            {branch.manager && `Manager: ${branch.manager}`}
+                            {branch.manager && branch.phone && " • "}
+                            {branch.phone && `Phone: ${branch.phone}`}
+                          </p>
+                        )}
                       </div>
                     </div>
                     {user?.role === "admin" && (
