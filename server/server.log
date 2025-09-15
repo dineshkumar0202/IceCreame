@@ -1,0 +1,8 @@
+nohup: ignoring input
+
+> icecream-server@1.0.0 start
+> node src/server.js
+
+🟢 Server running on 5001
+⚠️  MongoDB connection failed: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017
+⚠️  Running without database - some features may not work
