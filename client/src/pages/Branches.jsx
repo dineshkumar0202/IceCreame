@@ -307,9 +307,7 @@ export default function Branches() {
             </div>
           </div>
         )}
-        {/* Branches List */}
-        // ...existing imports and code... // Fix the Branches List section by
-        replacing the problematic part:
+
         {/* Branches List */}
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">

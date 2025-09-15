@@ -1,37 +1,39 @@
 import React, { useEffect, useState } from "react";
 import {
-  requestIngredient,
-  getRequests,
-  updateRequestStatus,
-  deleteRequest,
-} from "../services/ingredientService";
+  getBranches,
+  createBranch,
+  updateBranch,
+  deleteBranch,
+} from "../services/branchService";
 import { useAuth } from "../context/AuthContext";
-// import HomeImage from '../images/home.png';
 
-export default function Ingredients() {
+export default function Branches() {
   const { user } = useAuth();
-  const [requests, setRequests] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [form, setForm] = useState({
-    branch: user?.branch || "",
+    name: "",
     city: "",
-    flavor: "",
-    ingredient: "",
-    qty: 0,
+    area: "",
+    address: "",
+    phone: "",
+    manager: "",
   });
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    fetchRequests();
+    fetchBranches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchBranches = async () => {
     try {
       setLoading(true);
-      const data = await getRequests();
-      setRequests(data);
+      const data = await getBranches();
+      setBranches(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error("Error fetching branches:", error);
     } finally {
       setLoading(false);
     }
@@ -39,148 +41,143 @@ export default function Ingredients() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !form.branch ||
-      !form.city ||
-      !form.flavor ||
-      !form.ingredient ||
-      !form.qty
-    )
-      return;
+    if (!form.name || !form.city || !form.area) return;
 
     try {
       setLoading(true);
-      await requestIngredient(form);
+      if (editingId) {
+        await updateBranch(editingId, form);
+        setEditingId(null);
+      } else {
+        await createBranch(form);
+      }
       setForm({
-        branch: user?.branch || "",
+        name: "",
         city: "",
-        flavor: "",
-        ingredient: "",
-        qty: 0,
+        area: "",
+        address: "",
+        phone: "",
+        manager: "",
       });
       setShowForm(false);
-      await fetchRequests();
+      await fetchBranches();
     } catch (error) {
-      console.error("Error creating request:", error);
-      alert("Error creating request");
+      console.error("Error saving branch:", error);
+      alert("Error saving branch");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusUpdate = async (id, status) => {
-    try {
-      setLoading(true);
-      await updateRequestStatus(id, status);
-      await fetchRequests();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Error updating status");
-    } finally {
-      setLoading(false);
-    }
+  const handleEdit = (branch) => {
+    setForm({
+      name: branch.name,
+      city: branch.city,
+      area: branch.area,
+      address: branch.address || "",
+      phone: branch.phone || "",
+      manager: branch.manager || "",
+    });
+    setEditingId(branch._id);
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this request?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this branch?")) return;
 
     try {
       setLoading(true);
-      await deleteRequest(id);
-      await fetchRequests();
+      await deleteBranch(id);
+      await fetchBranches();
     } catch (error) {
-      console.error("Error deleting request:", error);
-      alert("Error deleting request");
+      console.error("Error deleting branch:", error);
+      alert("Error deleting branch");
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredRequests =
-    user?.role === "branch"
-      ? requests.filter((req) => req.branch === user.branch)
-      : requests;
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const handleCancel = () => {
+    setForm({
+      name: "",
+      city: "",
+      area: "",
+      address: "",
+      phone: "",
+      manager: "",
+    });
+    setEditingId(null);
+    setShowForm(false);
   };
+
+  const handleAddBranch = () => {
+    setForm({
+      name: "",
+      city: "",
+      area: "",
+      address: "",
+      phone: "",
+      manager: "",
+    });
+    setEditingId(null);
+    setShowForm(true);
+  };
+
+  const filteredBranches =
+    user?.role === "branch"
+      ? branches.filter((branch) => branch.name === user.branch)
+      : branches;
 
   return (
     <div className="h-full bg-gradient-to-br from-rose-50 to-pink-100 relative overflow-y-auto">
-      {/* Background Decorations */}
-      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">
-        🥛
-      </div>
-      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">
-        🍦
-      </div>
-      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">
-        🧁
-      </div>
-      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">
-        🍨
-      </div>
+      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">🏪</div>
+      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">🍦</div>
+      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">🏢</div>
+      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">🏬</div>
 
       <div className="container mx-auto px-6 py-8 relative z-10">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 flex items-center">
-              Ingredient Management{" "}
-              <span className="text-4xl animate-bounce ml-2">🥛</span>
+            <h1 className="text-4xl font-bold text-gray-900 flex items-center animate-fadeIn">
+              Branch Management <span className="text-4xl animate-bounce ml-2">🏪</span>
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600 mt-2 animate-fadeIn delay-200">
               {user?.role === "admin"
-                ? "Manage ingredient requests from all branches"
-                : `Request ingredients for ${user?.branch || "your branch"}`}
+                ? "Manage all branches across the network"
+                : `Viewing branch: ${user?.branch || "your branch"}`}
             </p>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-          >
-            {showForm ? "Cancel" : "+ New Request"}
-          </button>
+
+          {user?.role === "admin" && (
+            <button
+              onClick={handleAddBranch}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn"
+            >
+              {showForm ? "Cancel" : "+ Add Branch"}
+            </button>
+          )}
         </div>
 
-        {/* Add Request Form */}
-        {showForm && (
-          <div className="bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
+        {showForm && user?.role === "admin" && (
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              New Ingredient Request
+              {editingId ? "Edit Branch" : "Add New Branch"}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Branch
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Branch Name</label>
                   <input
                     type="text"
                     placeholder="Enter branch name"
-                    value={form.branch}
-                    onChange={(e) =>
-                      setForm({ ...form, branch: e.target.value })
-                    }
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
                     required
-                    readOnly={user?.role === "branch"}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                   <input
                     type="text"
                     placeholder="Enter city"
@@ -191,71 +188,55 @@ export default function Ingredients() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Flavor
-                  </label>
-                  <select
-                    value={form.flavor}
-                    onChange={(e) =>
-                      setForm({ ...form, flavor: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                    required
-                  >
-                    <option value="">Select flavor</option>
-                    <option value="Vanilla">Vanilla</option>
-                    <option value="Chocolate">Chocolate</option>
-                    <option value="Strawberry">Strawberry</option>
-                    <option value="Mint">Mint</option>
-                    <option value="Butter Pecan">Butter Pecan</option>
-                    <option value="Cookies & Cream">Cookies & Cream</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ingredient
-                  </label>
-                  <select
-                    value={form.ingredient}
-                    onChange={(e) =>
-                      setForm({ ...form, ingredient: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                    required
-                  >
-                    <option value="">Select ingredient</option>
-                    <option value="Milk">Milk</option>
-                    <option value="Cream">Cream</option>
-                    <option value="Sugar">Sugar</option>
-                    <option value="Cocoa powder">Cocoa powder</option>
-                    <option value="Vanilla extract">Vanilla extract</option>
-                    <option value="Strawberry flavor">Strawberry flavor</option>
-                    <option value="Mint extract">Mint extract</option>
-                    <option value="Pecans">Pecans</option>
-                    <option value="Cookies">Cookies</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quantity
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Area</label>
                   <input
-                    type="number"
-                    placeholder="Enter quantity"
-                    value={form.qty}
-                    onChange={(e) =>
-                      setForm({ ...form, qty: Number(e.target.value) })
-                    }
+                    type="text"
+                    placeholder="Enter area"
+                    value={form.area}
+                    onChange={(e) => setForm({ ...form, area: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
                     required
-                    min="1"
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <input
+                  type="text"
+                  placeholder="Enter address"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                <input
+                  type="text"
+                  placeholder="Enter phone number"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Manager</label>
+                <input
+                  type="text"
+                  placeholder="Enter manager name"
+                  value={form.manager}
+                  onChange={(e) => setForm({ ...form, manager: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                />
+              </div>
+
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={handleCancel}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
                 >
                   Cancel
@@ -265,172 +246,116 @@ export default function Ingredients() {
                   disabled={loading}
                   className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
-                  {loading ? "Creating..." : "Create Request"}
+                  {loading ? "Saving..." : editingId ? "Update Branch" : "Add Branch"}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Ingredient Analytics - Admin Only */}
         {user?.role === "admin" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-100 text-sm font-medium">
-                    Pending Requests
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {
-                      filteredRequests.filter((req) => req.status === "pending")
-                        .length
-                    }
-                  </p>
+                  <p className="text-blue-100 text-sm font-medium">Total Branches</p>
+                  <p className="text-3xl font-bold">{filteredBranches.length}</p>
                 </div>
-                <div className="text-4xl opacity-80">⏳</div>
+                <div className="text-4xl opacity-80">🏪</div>
               </div>
             </div>
+
             <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm font-medium">
-                    Approved Requests
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {
-                      filteredRequests.filter(
-                        (req) => req.status === "approved"
-                      ).length
-                    }
-                  </p>
+                  <p className="text-green-100 text-sm font-medium">Cities Covered</p>
+                  <p className="text-3xl font-bold">{new Set(filteredBranches.map((b) => b.city)).size}</p>
                 </div>
-                <div className="text-4xl opacity-80">✅</div>
+                <div className="text-4xl opacity-80">🌆</div>
               </div>
             </div>
-            <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-red-100 text-sm font-medium">
-                    Rejected Requests
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {
-                      filteredRequests.filter(
-                        (req) => req.status === "rejected"
-                      ).length
-                    }
-                  </p>
-                </div>
-                <div className="text-4xl opacity-80">❌</div>
-              </div>
-            </div>
+
             <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm font-medium">
-                    Total Quantity
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {filteredRequests.reduce((sum, req) => sum + req.qty, 0)}
-                  </p>
+                  <p className="text-purple-100 text-sm font-medium">Areas Covered</p>
+                  <p className="text-3xl font-bold">{new Set(filteredBranches.map((b) => b.area)).size}</p>
                 </div>
-                <div className="text-4xl opacity-80">📊</div>
+                <div className="text-4xl opacity-80">📍</div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Requests List */}
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">
-              {user?.role === "admin"
-                ? "All Ingredient Requests"
-                : "Your Requests"}
+              {user?.role === "admin" ? "All Branches" : `Your Branch: ${user?.branch}`}
             </h3>
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-            </div>
-          ) : filteredRequests.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🥛</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No Requests Found
-              </h3>
-              <p className="text-gray-600">
-                Create your first ingredient request!
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredRequests.map((request, index) => (
+          <div className="divide-y divide-gray-200">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : filteredBranches.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🏪</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Branches Found</h3>
+                <p className="text-gray-600">
+                  {user?.role === "admin" ? "Add your first branch to get started!" : "No branch information available."}
+                </p>
+              </div>
+            ) : (
+              filteredBranches.map((branch, index) => (
                 <div
-                  key={request._id}
+                  key={branch._id || branch.id || branch.name}
                   className="px-6 py-4 hover:bg-gray-50 transition-all duration-300 transform hover:scale-[1.02]"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {request.ingredient.charAt(0).toUpperCase()}
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {(branch.name && branch.name.charAt(0).toUpperCase()) || "B"}
                       </div>
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">
-                          {request.ingredient} - {request.qty} units
-                        </h4>
-                        <p className="text-gray-600">
-                          {request.branch} - {request.city} • {request.flavor} •{" "}
-                          {new Date(request.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                          request.status
-                        )}`}
-                      >
-                        {request.status}
-                      </span>
-                      {user?.role === "admin" &&
-                        request.status === "pending" && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(request._id, "approved")
-                              }
-                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(request._id, "rejected")
-                              }
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                            >
-                              Reject
-                            </button>
+                        <h4 className="text-lg font-semibold text-gray-900">{branch.name}</h4>
+                        <p className="text-gray-600">{branch.city} - {branch.area}</p>
+                        {(branch.address || branch.phone || branch.manager) && (
+                          <div className="text-sm text-gray-500 mt-1">
+                            {branch.address && <div>{branch.address}</div>}
+                            <div>
+                              {branch.manager && `Manager: ${branch.manager}`}
+                              {branch.manager && branch.phone && " • "}
+                              {branch.phone && `Phone: ${branch.phone}`}
+                            </div>
                           </div>
                         )}
-                      {user?.role === "admin" && (
+                      </div>
+                    </div>
+
+                    {user?.role === "admin" && (
+                      <div className="flex space-x-2">
                         <button
-                          onClick={() => handleDelete(request._id)}
+                          onClick={() => handleEdit(branch)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(branch._id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
                         >
-                          Delete
+                          🗑️ Delete
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
