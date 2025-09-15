@@ -1,4 +1,5 @@
 import React from "react";
+import { BrowserRouter } from 'react-router-dom';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
@@ -65,6 +66,7 @@ export default function App() {
             element={user ? <Navigate to="/" replace /> : <Login />} 
           />
           <Route path="*" element={<NotFound />} />
+          
         </Routes>
       </div>
     </div>

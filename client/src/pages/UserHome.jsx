@@ -106,6 +106,7 @@ export default function UserHome() {
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               {/* Recent Sales */}
               <div>
                 <h4 className="text-lg font-semibold text-rose-700 mb-3">Recent Sales</h4>
@@ -147,7 +148,7 @@ export default function UserHome() {
           </div>
         )}
         
-         {/* Recent Requests
+         Recent Requests
          {requests.length > 0 && (
           <div className="bg-white rounded-xl p-6 shadow-lg mb-8 animate-fadeIn delay-500">
             <h3 className="text-2xl font-bold text-rose-800 mb-4 flex items-center">
@@ -180,7 +181,7 @@ export default function UserHome() {
               ))}
             </div>
           </div>
-        )} */}
+        )}
         
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -200,4 +201,4 @@ export default function UserHome() {
       </div>
     </div>
   );
-}
+} 

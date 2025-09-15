@@ -84,19 +84,22 @@ export default function Sales() {
       <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">💸</div>
       
       <div className="container mx-auto px-6 py-8 relative z-10">
+
+
         {/* Header */}
-        <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center">
-            Sales Management <span className="text-4xl animate-bounce ml-2">🍦</span>
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {user?.role === 'admin' 
-              ? 'View and manage all sales across branches' 
-              : `Track sales for ${user?.username || 'your account'}`
-            }
-          </p>
-        </div>
+
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 flex items-center">
+              Sales Management <span className="text-4xl animate-bounce ml-2">💰</span>
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {user?.role === 'admin' 
+                ? 'View and manage all sales across branches' 
+                : `Track sales for ${user?.branch || 'your branch'}`
+              }
+            </p>
+          </div>
         {user?.role === 'admin' && (
           <button
             onClick={() => setShowForm(!showForm)}

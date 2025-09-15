@@ -3,8 +3,9 @@ const ctrl = require('../controllers/ingredientController');
 const auth = require('../middleware/authMiddleware');
 
 r.get('/', auth(), ctrl.list);
-r.post('/', auth(['admin']), ctrl.request);
+r.post('/', auth(), ctrl.request);
 r.put('/:id', auth(['admin']), ctrl.update);
+r.patch('/:id', auth(['admin']), ctrl.updateStatus); 
 r.delete('/:id', auth(['admin']), ctrl.delete);
 
 module.exports = r;

@@ -32,6 +32,26 @@ exports.update = async (req, res) => {
   }
 };
 
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!['pending', 'approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+    
+    const request = await Req.findByIdAndUpdate(id, { status }, { new: true });
+    if (!request) {
+      return res.status(404).json({ message: 'Ingredient request not found' });
+    }
+    res.json(request);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating ingredient request status' });
+  }
+};
+
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;

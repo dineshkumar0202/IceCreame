@@ -160,6 +160,7 @@ export default function AdminPage() {
         </div>
       </div>
 
+
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Sales */}
@@ -209,7 +210,8 @@ export default function AdminPage() {
         </div>
 
         {/* Recent Requests */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-1300">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
               Recent Requests <span className="text-xl animate-bounce ml-2">🥛</span>
             </h3>
@@ -260,7 +262,7 @@ export default function AdminPage() {
             ))}
           </div>
         </div>
+        </div>
       </div>
-
   );
 }
