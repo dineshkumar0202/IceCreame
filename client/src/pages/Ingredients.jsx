@@ -107,18 +107,18 @@ export default function Ingredients() {
       
       <div className="container mx-auto px-6 py-8 relative z-10">
         {/* Header */}
-        <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center">
-            Ingredient Management <span className="text-4xl animate-bounce ml-2">🍦</span>
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {user?.role === 'admin' 
-              ? 'Manage ingredient requests from all branches' 
-              : `Request ingredients for ${user?.username || 'your account'}`
-            }
-          </p>
-        </div>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 flex items-center">
+              Ingredient Management <span className="text-4xl animate-bounce ml-2">🥛</span>
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {user?.role === 'admin' 
+                ? 'Manage ingredient requests from all branches' 
+                : `Request ingredients for ${user?.branch || 'your branch'}`
+              }
+            </p>
+          </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
