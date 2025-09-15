@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Branches() {
   const { user } = useAuth();
   const [branches, setBranches] = useState([]);
-  const [form, setForm] = useState({ name: '', city: '', area: '' });
+  const [form, setForm] = useState({ name: '', city: '', area: '', address: '', phone: '', manager: '' });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -38,7 +38,7 @@ export default function Branches() {
       } else {
         await createBranch(form);
       }
-      setForm({ name: '', city: '', area: '' });
+      setForm({ name: '', city: '', area: '', address: '', phone: '', manager: '' });
       setShowForm(false);
       await fetchBranches();
     } catch (error) {
@@ -50,7 +50,14 @@ export default function Branches() {
   };
 
   const handleEdit = (branch) => {
-    setForm({ name: branch.name, city: branch.city, area: branch.area });
+    setForm({ 
+      name: branch.name, 
+      city: branch.city, 
+      area: branch.area,
+      address: branch.address || '',
+      phone: branch.phone || '',
+      manager: branch.manager || ''
+    });
     setEditingId(branch._id);
     setShowForm(true);
   };
@@ -159,6 +166,42 @@ export default function Branches() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter address"
+                    value={form.address}
+                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter phone number"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Manager
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter manager name"
+                    value={form.manager}
+                    onChange={(e) => setForm({ ...form, manager: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  />
+                </div>
               </div>
               <div className="flex justify-end space-x-4">
                 <button
@@ -216,6 +259,14 @@ export default function Branches() {
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900">{branch.name}</h4>
                         <p className="text-gray-600">{branch.city} - {branch.area}</p>
+                        {branch.address && <p className="text-sm text-gray-500">{branch.address}</p>}
+                        {(branch.phone || branch.manager) && (
+                          <p className="text-sm text-gray-500">
+                            {branch.manager && `Manager: ${branch.manager}`}
+                            {branch.manager && branch.phone && ' • '}
+                            {branch.phone && `Phone: ${branch.phone}`}
+                          </p>
+                        )}
                       </div>
                     </div>
                     {user?.role === 'admin' && (

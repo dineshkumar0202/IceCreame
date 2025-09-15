@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getSales } from "../services/salesService";
 import { getRequests } from "../services/ingredientService";
+import { getBranches } from "../services/branchService";
 
 export default function UserHome() {
   const { user } = useAuth();
   const [sales, setSales] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [branchDetails, setBranchDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,22 +18,26 @@ export default function UserHome() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const [salesData, requestsData] = await Promise.all([
+      const [salesData, requestsData, branchesData] = await Promise.all([
         getSales().catch(() => []), // Fallback to empty array if API fails
-        getRequests().catch(() => []) // Fallback to empty array if API fails
+        getRequests().catch(() => []), // Fallback to empty array if API fails
+        getBranches().catch(() => []) // Fallback to empty array if API fails
       ]);
       
       // Filter data for current user's branch
       const userSales = salesData.filter(sale => sale.branch === user?.branch);
       const userRequests = requestsData.filter(req => req.branch === user?.branch);
+      const userBranch = branchesData.find(branch => branch.name === user?.branch);
       
       setSales(userSales);
       setRequests(userRequests);
+      setBranchDetails(userBranch);
     } catch (error) {
       console.error("Error fetching user data:", error);
       // Set empty arrays as fallback
       setSales([]);
       setRequests([]);
+      setBranchDetails(null);
     } finally {
       setLoading(false);
     }
@@ -69,7 +75,7 @@ export default function UserHome() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-6 mb-8 animate-fadeIn delay-400">
           <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-rose-800">{totalSales.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-rose-800">₹{totalSales.toLocaleString()}</div>
             <div className="text-sm text-rose-600">Total Sales</div>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -78,12 +84,69 @@ export default function UserHome() {
           </div>
           <div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-rose-800">{pendingRequests}</div>
-            <div className="text-sm text-rose-600">Requests</div>
+            <div className="text-sm text-rose-600">Pending Requests</div>
           </div>
         </div>
         
+        {/* Branch Information */}
+        {user?.branch && (
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-8 animate-fadeIn delay-500">
+            <h3 className="text-2xl font-bold text-rose-800 mb-4">Your Branch: {user.branch}</h3>
+            {branchDetails && (
+              <div className="bg-rose-50 rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div><span className="font-semibold text-rose-700">City:</span> {branchDetails.city}</div>
+                  <div><span className="font-semibold text-rose-700">Area:</span> {branchDetails.area}</div>
+                  {branchDetails.address && <div><span className="font-semibold text-rose-700">Address:</span> {branchDetails.address}</div>}
+                  {branchDetails.phone && <div><span className="font-semibold text-rose-700">Phone:</span> {branchDetails.phone}</div>}
+                  {branchDetails.manager && <div><span className="font-semibold text-rose-700">Manager:</span> {branchDetails.manager}</div>}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Recent Sales */}
+              <div>
+                <h4 className="text-lg font-semibold text-rose-700 mb-3">Recent Sales</h4>
+                <div className="space-y-2">
+                  {sales.slice(0, 3).map((sale, index) => (
+                    <div key={sale._id} className="flex justify-between items-center bg-rose-50 p-3 rounded-lg">
+                      <span className="text-rose-800">{sale.flavor}</span>
+                      <span className="font-bold text-rose-600">₹{sale.amount}</span>
+                    </div>
+                  ))}
+                  {sales.length === 0 && (
+                    <p className="text-rose-500 text-sm">No sales recorded yet</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Recent Requests */}
+              <div>
+                <h4 className="text-lg font-semibold text-rose-700 mb-3">Recent Requests</h4>
+                <div className="space-y-2">
+                  {requests.slice(0, 3).map((request, index) => (
+                    <div key={request._id} className="flex justify-between items-center bg-rose-50 p-3 rounded-lg">
+                      <span className="text-rose-800">{request.ingredient}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {request.status}
+                      </span>
+                    </div>
+                  ))}
+                  {requests.length === 0 && (
+                    <p className="text-rose-500 text-sm">No requests made yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <button className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-600">
-          Join Now
+          Get Started
         </button>
       </div>
     </div>

@@ -22,12 +22,21 @@ exports.list = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const request = await Req.findByIdAndUpdate(id, req.body, { new: true });
+    const updateData = { ...req.body };
+    
+    // If status is being changed to approved or rejected, add processing info
+    if (updateData.status && ['approved', 'rejected'].includes(updateData.status)) {
+      updateData.processedDate = new Date();
+      updateData.processedBy = req.user?.username || req.user?.email || 'admin';
+    }
+    
+    const request = await Req.findByIdAndUpdate(id, updateData, { new: true });
     if (!request) {
       return res.status(404).json({ message: 'Ingredient request not found' });
     }
     res.json(request);
   } catch (error) {
+    console.error('Error updating ingredient request:', error);
     res.status(500).json({ message: 'Error updating ingredient request' });
   }
 };
