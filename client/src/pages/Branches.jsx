@@ -146,7 +146,6 @@ export default function Branches() {
             </button>
           )}
         </div>
-
         {/* Add/Edit Form - Admin Only */}
         {showForm && user?.role === "admin" && (
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
@@ -308,7 +307,9 @@ export default function Branches() {
             </div>
           </div>
         )}
-
+        {/* Branches List */}
+        // ...existing imports and code... // Fix the Branches List section by
+        replacing the problematic part:
         {/* Branches List */}
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -319,81 +320,77 @@ export default function Branches() {
             </h3>
           </div>
 
-          <p className="text-gray-600">
-            {branch.city} - {branch.area}
-          </p>
-          {branch.address && (
-            <p className="text-sm text-gray-500">{branch.address}</p>
-          )}
-          {(branch.phone || branch.manager) && (
-            <p className="text-sm text-gray-500">
-              {branch.manager && `Manager: ${branch.manager}`}
-              {branch.manager && branch.phone && " • "}
-              {branch.phone && `Phone: ${branch.phone}`}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      ) : filteredBranches.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🏪</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No Branches Found
-          </h3>
-          <p className="text-gray-600">
-            {user?.role === "admin"
-              ? "Add your first branch to get started!"
-              : "No branch information available."}
-          </p>
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-200">
-          {filteredBranches.map((branch, index) => (
-            <div
-              key={branch._id}
-              className="px-6 py-4 hover:bg-gray-50 transition-all duration-300 transform hover:scale-[1.02]"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {branch.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      {branch.name}
-                    </h4>
-                    <p className="text-gray-600">
-                      {branch.city} - {branch.area}
-                    </p>
+          <div className="divide-y divide-gray-200">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : filteredBranches.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🏪</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Branches Found
+                </h3>
+                <p className="text-gray-600">
+                  {user?.role === "admin"
+                    ? "Add your first branch to get started!"
+                    : "No branch information available."}
+                </p>
+              </div>
+            ) : (
+              filteredBranches.map((branch, index) => (
+                <div
+                  key={branch._id}
+                  className="px-6 py-4 hover:bg-gray-50 transition-all duration-300 transform hover:scale-[1.02]"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {branch.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {branch.name}
+                        </h4>
+                        <p className="text-gray-600">
+                          {branch.city} - {branch.area}
+                        </p>
+                        {(branch.address || branch.phone || branch.manager) && (
+                          <div className="text-sm text-gray-500 mt-1">
+                            {branch.address && <div>{branch.address}</div>}
+                            <div>
+                              {branch.manager && `Manager: ${branch.manager}`}
+                              {branch.manager && branch.phone && " • "}
+                              {branch.phone && `Phone: ${branch.phone}`}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {user?.role === "admin" && (
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(branch)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(branch._id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                {user?.role === "admin" && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(branch)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(branch._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+              ))
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
