@@ -119,18 +119,16 @@ export default function Ingredients() {
             }
           </p>
         </div>
-        {user?.role === 'admin' && (
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-          >
-            {showForm ? 'Cancel' : '+ New Request'}
-          </button>
-        )}
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+        >
+          {showForm ? 'Cancel' : '+ New Request'}
+        </button>
       </div>
 
-      {/* Add Request Form - Admin Only */}
-      {showForm && user?.role === 'admin' && (
+      {/* Add Request Form */}
+      {showForm && (
         <div className="bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">New Ingredient Request</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -139,15 +137,15 @@ export default function Ingredients() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Branch
                 </label>
-                <input
-                  type="text"
-                  placeholder="Enter branch name"
-                  value={form.branch}
-                  onChange={(e) => setForm({ ...form, branch: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                  required
-                  disabled={user?.role === 'branch'}
-                />
+                  <input
+                    type="text"
+                    placeholder="Enter branch name"
+                    value={form.branch}
+                    onChange={(e) => setForm({ ...form, branch: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                    required
+                    readOnly={user?.role === 'branch'}
+                  />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
