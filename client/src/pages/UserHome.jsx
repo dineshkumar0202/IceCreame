@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getSales } from "../services/salesService";
 import { getRequests } from "../services/ingredientService";
+import { useNavigate } from "react-router-dom";
 
 export default function UserHome() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [sales, setSales] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,9 +84,56 @@ export default function UserHome() {
           </div>
         </div>
         
-        <button className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-600">
-          Join Now
-        </button>
+        {/* Recent Requests */}
+        {requests.length > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-8 animate-fadeIn delay-500">
+            <h3 className="text-2xl font-bold text-rose-800 mb-4 flex items-center">
+              Recent Ingredient Requests <span className="text-2xl animate-bounce ml-2">🥛</span>
+            </h3>
+            <div className="space-y-3">
+              {requests.slice(0, 3).map((request, index) => (
+                <div
+                  key={request._id}
+                  className="flex items-center justify-between p-3 bg-rose-50 rounded-lg hover:bg-rose-100 transition-all duration-300"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {request.ingredient.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-rose-900 text-sm">{request.ingredient}</p>
+                      <p className="text-xs text-rose-600">{request.flavor} • {request.qty} units</p>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {request.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button 
+            onClick={() => navigate('/ingredients')}
+            className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-600"
+          >
+            🥛 Request Ingredients
+          </button>
+          <button 
+            onClick={() => navigate('/sales')}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-700"
+          >
+            💰 View Sales
+          </button>
+        </div>
       </div>
     </div>
   );
