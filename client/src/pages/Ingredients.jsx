@@ -119,18 +119,16 @@ export default function Ingredients() {
             }
           </p>
         </div>
-        {user?.role === 'admin' && (
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-          >
-            {showForm ? 'Cancel' : '+ New Request'}
-          </button>
-        )}
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+        >
+          {showForm ? 'Cancel' : (user?.role === 'admin' ? '+ New Request' : '+ Request Ingredient')}
+        </button>
       </div>
 
-      {/* Add Request Form - Admin Only */}
-      {showForm && user?.role === 'admin' && (
+      {/* Add Request Form - Both Admin and Users */}
+      {showForm && (
         <div className="bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">New Ingredient Request</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -235,6 +233,48 @@ export default function Ingredients() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Ingredient Analytics - Admin Only */}
+      {user?.role === 'admin' && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100 text-sm font-medium">Pending Requests</p>
+                <p className="text-3xl font-bold">{filteredRequests.filter(req => req.status === 'pending').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">⏳</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm font-medium">Approved Requests</p>
+                <p className="text-3xl font-bold">{filteredRequests.filter(req => req.status === 'approved').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">✅</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-100 text-sm font-medium">Rejected Requests</p>
+                <p className="text-3xl font-bold">{filteredRequests.filter(req => req.status === 'rejected').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">❌</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Total Quantity</p>
+                <p className="text-3xl font-bold">{filteredRequests.reduce((sum, req) => sum + req.qty, 0)}</p>
+              </div>
+              <div className="text-4xl opacity-80">📊</div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import { getTotals, getTopFlavors } from "../services/dashboardService";
@@ -9,6 +10,7 @@ import Chart from "../components/Chart";
 
 export default function AdminPage () {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [totals, setTotals] = useState({
     totalOutlets: 0,
     totalSales: { totalUnits: 0, totalAmount: 0 },
@@ -126,15 +128,24 @@ export default function AdminPage () {
           Quick Actions <span className="text-2xl animate-bounce ml-2">🍦</span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="bg-rose-500 hover:bg-rose-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-900">
+          <button 
+            onClick={() => navigate('/branches')}
+            className="bg-rose-500 hover:bg-rose-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-900"
+          >
             <div className="text-2xl mb-2">🏪</div>
             <div>Manage Branches</div>
           </button>
-          <button className="bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1000">
+          <button 
+            onClick={() => navigate('/sales')}
+            className="bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1000"
+          >
             <div className="text-2xl mb-2">💰</div>
             <div>View Sales</div>
           </button>
-          <button className="bg-rose-600 hover:bg-rose-700 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1100">
+          <button 
+            onClick={() => navigate('/ingredients')}
+            className="bg-rose-600 hover:bg-rose-700 text-white p-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn delay-1100"
+          >
             <div className="text-2xl mb-2">🥛</div>
             <div>Manage Ingredients</div>
           </button>
@@ -145,9 +156,17 @@ export default function AdminPage () {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Sales */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-1200">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            Recent Sales <span className="text-xl animate-bounce ml-2">💰</span>
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              Recent Sales <span className="text-xl animate-bounce ml-2">💰</span>
+            </h3>
+            <button 
+              onClick={() => navigate('/sales')}
+              className="text-sm text-rose-600 hover:text-rose-700 font-medium transition-colors duration-200"
+            >
+              View All →
+            </button>
+          </div>
           <div className="space-y-3">
             {recentSales.map((sale, index) => (
               <div
@@ -175,9 +194,17 @@ export default function AdminPage () {
 
         {/* Recent Requests */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fadeIn delay-1300">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            Recent Requests <span className="text-xl animate-bounce ml-2">🥛</span>
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              Recent Requests <span className="text-xl animate-bounce ml-2">🥛</span>
+            </h3>
+            <button 
+              onClick={() => navigate('/ingredients')}
+              className="text-sm text-rose-600 hover:text-rose-700 font-medium transition-colors duration-200"
+            >
+              View All →
+            </button>
+          </div>
           <div className="space-y-3">
             {recentRequests.map((request, index) => (
               <div

@@ -180,6 +180,39 @@ export default function Branches() {
           </div>
         )}
 
+        {/* Branch Analytics - Admin Only */}
+        {user?.role === 'admin' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Total Branches</p>
+                  <p className="text-3xl font-bold">{filteredBranches.length}</p>
+                </div>
+                <div className="text-4xl opacity-80">🏪</div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Cities Covered</p>
+                  <p className="text-3xl font-bold">{new Set(filteredBranches.map(branch => branch.city)).size}</p>
+                </div>
+                <div className="text-4xl opacity-80">🌆</div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Areas Covered</p>
+                  <p className="text-3xl font-bold">{new Set(filteredBranches.map(branch => branch.area)).size}</p>
+                </div>
+                <div className="text-4xl opacity-80">📍</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Branches List */}
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
