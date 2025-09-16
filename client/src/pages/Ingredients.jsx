@@ -75,13 +75,21 @@ export default function Ingredients() {
       return;
     }
 
+    // Check if user is authenticated before making the request
+    if (!user || !user.token) {
+      alert("You must be logged in to create ingredient requests. Please log in again.");
+      return;
+    }
+
     try {
       setLoading(true);
       if (editingId) {
         await updateRequest(editingId, form);
         setEditingId(null);
+        alert("Ingredient request updated successfully!");
       } else {
         await requestIngredient(form);
+        alert("Ingredient request created successfully!");
       }
       setForm({
         branch: user?.role === "branch" ? user.branch : "",
@@ -94,7 +102,18 @@ export default function Ingredients() {
       await fetchRequests();
     } catch (error) {
       console.error("Error saving ingredient request:", error);
-      alert("Error saving ingredient request: " + (error.response?.data?.message || error.message));
+      
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        // The API interceptor will handle the redirect
+      } else if (error.response?.status === 403) {
+        alert("You don't have permission to perform this action.");
+      } else if (error.response?.status === 500) {
+        alert("Server error occurred. Please try again later.");
+      } else {
+        alert("Error saving ingredient request: " + (error.response?.data?.message || error.message));
+      }
     } finally {
       setLoading(false);
     }
