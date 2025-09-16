@@ -2,10 +2,18 @@ const Req = require('../models/IngredientRequest');
 
 exports.request = async (req, res) => {
   try {
+    console.log('Ingredient request received from user:', {
+      id: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      branch: req.user.branch
+    });
+    console.log('Request body:', req.body);
+
     // Add the requesting user's information to the request
     const requestData = {
       ...req.body,
-      requestedBy: req.user.username || req.user.email,
+      requestedBy: req.user.username || req.user.email || req.user.id,
       // If user has a branch, use it; otherwise use the branch from request body
       branch: req.user.branch || req.body.branch
     };
