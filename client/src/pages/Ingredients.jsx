@@ -1,97 +1,140 @@
 import React, { useEffect, useState } from "react";
 import {
-  getBranches,
-  createBranch,
-  updateBranch,
-  deleteBranch,
-} from "../services/branchService";
+  requestIngredient,
+  getRequests,
+  updateRequest,
+  updateRequestStatus,
+  deleteRequest,
+} from "../services/ingredientService";
+import { getBranches } from "../services/branchService";
 import { useAuth } from "../context/AuthContext";
 
-export default function Branches() {
+export default function Ingredients() {
   const { user } = useAuth();
+  const [requests, setRequests] = useState([]);
   const [branches, setBranches] = useState([]);
   const [form, setForm] = useState({
-    name: "",
+    branch: "",
     city: "",
-    area: "",
-    address: "",
-    phone: "",
-    manager: "",
+    flavor: "",
+    ingredient: "",
+    qty: 1,
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
+  const flavors = [
+    "Vanilla", "Chocolate", "Strawberry", "Mint", "Cookies & Cream", 
+    "Rocky Road", "Neapolitan", "Pistachio", "Mango", "Coconut"
+  ];
+
+  const ingredients = [
+    "Milk", "Cream", "Sugar", "Vanilla Extract", "Cocoa Powder", 
+    "Strawberry Puree", "Mint Leaves", "Cookie Pieces", "Nuts", 
+    "Chocolate Chips", "Food Coloring", "Stabilizers", "Eggs"
+  ];
+
   useEffect(() => {
+    fetchRequests();
     fetchBranches();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchBranches = async () => {
+  const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data = await getBranches();
-      setBranches(Array.isArray(data) ? data : []);
+      const data = await getRequests();
+      setRequests(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching branches:", error);
+      console.error("Error fetching ingredient requests:", error);
+      alert("Error fetching ingredient requests: " + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const data = await getBranches();
+      setBranches(Array.isArray(data) ? data : []);
+      
+      // Set default branch for branch users
+      if (user?.role === "branch" && user?.branch) {
+        setForm(prev => ({ ...prev, branch: user.branch }));
+      }
+    } catch (error) {
+      console.error("Error fetching branches:", error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.city || !form.area) return;
+    if (!form.branch || !form.city || !form.flavor || !form.ingredient || !form.qty) {
+      alert("Please fill in all fields");
+      return;
+    }
 
     try {
       setLoading(true);
       if (editingId) {
-        await updateBranch(editingId, form);
+        await updateRequest(editingId, form);
         setEditingId(null);
       } else {
-        await createBranch(form);
+        await requestIngredient(form);
       }
       setForm({
-        name: "",
+        branch: user?.role === "branch" ? user.branch : "",
         city: "",
-        area: "",
-        address: "",
-        phone: "",
-        manager: "",
+        flavor: "",
+        ingredient: "",
+        qty: 1,
       });
       setShowForm(false);
-      await fetchBranches();
+      await fetchRequests();
     } catch (error) {
-      console.error("Error saving branch:", error);
-      alert("Error saving branch");
+      console.error("Error saving ingredient request:", error);
+      alert("Error saving ingredient request: " + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (branch) => {
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      setLoading(true);
+      await updateRequestStatus(id, status);
+      await fetchRequests();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Error updating status: " + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (request) => {
     setForm({
-      name: branch.name,
-      city: branch.city,
-      area: branch.area,
-      address: branch.address || "",
-      phone: branch.phone || "",
-      manager: branch.manager || "",
+      branch: request.branch,
+      city: request.city,
+      flavor: request.flavor,
+      ingredient: request.ingredient,
+      qty: request.qty,
     });
-    setEditingId(branch._id);
+    setEditingId(request._id);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this branch?")) return;
+    if (!window.confirm("Are you sure you want to delete this request?")) return;
 
     try {
       setLoading(true);
-      await deleteBranch(id);
-      await fetchBranches();
+      await deleteRequest(id);
+      await fetchRequests();
     } catch (error) {
-      console.error("Error deleting branch:", error);
-      alert("Error deleting branch");
+      console.error("Error deleting request:", error);
+      alert("Error deleting request: " + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -99,82 +142,97 @@ export default function Branches() {
 
   const handleCancel = () => {
     setForm({
-      name: "",
+      branch: user?.role === "branch" ? user.branch : "",
       city: "",
-      area: "",
-      address: "",
-      phone: "",
-      manager: "",
+      flavor: "",
+      ingredient: "",
+      qty: 1,
     });
     setEditingId(null);
     setShowForm(false);
   };
 
-  const handleAddBranch = () => {
+  const handleAddRequest = () => {
     setForm({
-      name: "",
+      branch: user?.role === "branch" ? user.branch : "",
       city: "",
-      area: "",
-      address: "",
-      phone: "",
-      manager: "",
+      flavor: "",
+      ingredient: "",
+      qty: 1,
     });
     setEditingId(null);
     setShowForm(true);
   };
 
-  const filteredBranches =
-    user?.role === "branch"
-      ? branches.filter((branch) => branch.name === user.branch)
-      : branches;
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved": return "bg-green-100 text-green-800";
+      case "rejected": return "bg-red-100 text-red-800";
+      default: return "bg-yellow-100 text-yellow-800";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "approved": return "✅";
+      case "rejected": return "❌";
+      default: return "⏳";
+    }
+  };
 
   return (
-    <div className="h-full bg-gradient-to-br from-rose-50 to-pink-100 relative overflow-y-auto">
-      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">🏪</div>
+    <div className="h-full bg-gradient-to-br from-orange-50 to-amber-100 relative overflow-y-auto">
+      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">🧊</div>
       <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">🍦</div>
-      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">🏢</div>
-      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">🏬</div>
+      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">🥛</div>
+      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">🍓</div>
 
       <div className="container mx-auto px-6 py-8 relative z-10">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 flex items-center animate-fadeIn">
-              Branch Management <span className="text-4xl animate-bounce ml-2">🏪</span>
+              Ingredient Requests <span className="text-4xl animate-bounce ml-2">🧊</span>
             </h1>
             <p className="text-gray-600 mt-2 animate-fadeIn delay-200">
               {user?.role === "admin"
-                ? "Manage all branches across the network"
-                : `Viewing branch: ${user?.branch || "your branch"}`}
+                ? "Manage all ingredient requests across branches"
+                : "Request ingredients for your branch"}
             </p>
           </div>
 
-          {user?.role === "admin" && (
+          {user?.role !== "admin" && (
             <button
-              onClick={handleAddBranch}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn"
+              onClick={handleAddRequest}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn"
             >
-              {showForm ? "Cancel" : "+ Add Branch"}
+              {showForm ? "Cancel" : "+ New Request"}
             </button>
           )}
         </div>
 
-        {showForm && user?.role === "admin" && (
+        {showForm && user?.role !== "admin" && (
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              {editingId ? "Edit Branch" : "Add New Branch"}
+              {editingId ? "Edit Request" : "New Ingredient Request"}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Branch Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter branch name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Branch</label>
+                  <select
+                    value={form.branch}
+                    onChange={(e) => setForm({ ...form, branch: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
-                  />
+                    disabled={user?.role === "branch"}
+                  >
+                    <option value="">Select Branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch._id} value={branch.name}>
+                        {branch.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
@@ -183,53 +241,57 @@ export default function Branches() {
                     placeholder="Enter city"
                     value={form.city}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Flavor</label>
+                  <select
+                    value={form.flavor}
+                    onChange={(e) => setForm({ ...form, flavor: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+                    required
+                  >
+                    <option value="">Select Flavor</option>
+                    {flavors.map((flavor) => (
+                      <option key={flavor} value={flavor}>
+                        {flavor}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Area</label>
-                  <input
-                    type="text"
-                    placeholder="Enter area"
-                    value={form.area}
-                    onChange={(e) => setForm({ ...form, area: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ingredient</label>
+                  <select
+                    value={form.ingredient}
+                    onChange={(e) => setForm({ ...form, ingredient: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
-                  />
+                  >
+                    <option value="">Select Ingredient</option>
+                    {ingredients.map((ingredient) => (
+                      <option key={ingredient} value={ingredient}>
+                        {ingredient}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity (kg/liters)</label>
                 <input
-                  type="text"
-                  placeholder="Enter address"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                <input
-                  type="text"
-                  placeholder="Enter phone number"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Manager</label>
-                <input
-                  type="text"
-                  placeholder="Enter manager name"
-                  value={form.manager}
-                  onChange={(e) => setForm({ ...form, manager: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                  value={form.qty}
+                  onChange={(e) => setForm({ ...form, qty: parseInt(e.target.value) || 1 })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+                  required
                 />
               </div>
 
@@ -244,113 +306,149 @@ export default function Branches() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : editingId ? "Update Branch" : "Add Branch"}
+                  {loading ? "Saving..." : editingId ? "Update Request" : "Submit Request"}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {user?.role === "admin" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">Total Branches</p>
-                  <p className="text-3xl font-bold">{filteredBranches.length}</p>
-                </div>
-                <div className="text-4xl opacity-80">🏪</div>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Total Requests</p>
+                <p className="text-3xl font-bold">{requests.length}</p>
               </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-medium">Cities Covered</p>
-                  <p className="text-3xl font-bold">{new Set(filteredBranches.map((b) => b.city)).size}</p>
-                </div>
-                <div className="text-4xl opacity-80">🌆</div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">Areas Covered</p>
-                  <p className="text-3xl font-bold">{new Set(filteredBranches.map((b) => b.area)).size}</p>
-                </div>
-                <div className="text-4xl opacity-80">📍</div>
-              </div>
+              <div className="text-4xl opacity-80">📋</div>
             </div>
           </div>
-        )}
+
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100 text-sm font-medium">Pending</p>
+                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'pending').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">⏳</div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm font-medium">Approved</p>
+                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'approved').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">✅</div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-100 text-sm font-medium">Rejected</p>
+                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'rejected').length}</p>
+              </div>
+              <div className="text-4xl opacity-80">❌</div>
+            </div>
+          </div>
+        </div>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">
-              {user?.role === "admin" ? "All Branches" : `Your Branch: ${user?.branch}`}
+              {user?.role === "admin" ? "All Ingredient Requests" : "Your Requests"}
             </h3>
           </div>
 
           <div className="divide-y divide-gray-200">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
               </div>
-            ) : filteredBranches.length === 0 ? (
+            ) : requests.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🏪</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Branches Found</h3>
+                <div className="text-6xl mb-4">🧊</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Requests Found</h3>
                 <p className="text-gray-600">
-                  {user?.role === "admin" ? "Add your first branch to get started!" : "No branch information available."}
+                  {user?.role === "admin" ? "No ingredient requests have been made yet." : "Create your first ingredient request!"}
                 </p>
               </div>
             ) : (
-              filteredBranches.map((branch, index) => (
+              requests.map((request, index) => (
                 <div
-                  key={branch._id || branch.id || branch.name}
-                  className="px-6 py-4 hover:bg-gray-50 transition-all duration-300 transform hover:scale-[1.02]"
+                  key={request._id}
+                  className="px-6 py-4 hover:bg-gray-50 transition-all duration-300"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {(branch.name && branch.name.charAt(0).toUpperCase()) || "B"}
+                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {request.ingredient.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">{branch.name}</h4>
-                        <p className="text-gray-600">{branch.city} - {branch.area}</p>
-                        {(branch.address || branch.phone || branch.manager) && (
-                          <div className="text-sm text-gray-500 mt-1">
-                            {branch.address && <div>{branch.address}</div>}
-                            <div>
-                              {branch.manager && `Manager: ${branch.manager}`}
-                              {branch.manager && branch.phone && " • "}
-                              {branch.phone && `Phone: ${branch.phone}`}
-                            </div>
-                          </div>
-                        )}
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {request.ingredient} for {request.flavor}
+                        </h4>
+                        <p className="text-gray-600">
+                          {request.branch} - {request.city} • Qty: {request.qty} kg/L
+                        </p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                          <span>Requested by: {request.requestedBy}</span>
+                          <span>•</span>
+                          <span>{new Date(request.date).toLocaleDateString()}</span>
+                        </div>
                       </div>
                     </div>
 
-                    {user?.role === "admin" && (
+                    <div className="flex items-center space-x-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
+                        {getStatusIcon(request.status)} {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      </span>
+
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(branch)}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                        >
-                          ✏️ Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(branch._id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                        >
-                          🗑️ Delete
-                        </button>
+                        {user?.role === "admin" && request.status === "pending" && (
+                          <>
+                            <button
+                              onClick={() => handleStatusUpdate(request._id, "approved")}
+                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                              disabled={loading}
+                            >
+                              ✅ Approve
+                            </button>
+                            <button
+                              onClick={() => handleStatusUpdate(request._id, "rejected")}
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                              disabled={loading}
+                            >
+                              ❌ Reject
+                            </button>
+                          </>
+                        )}
+
+                        {user?.role !== "admin" && request.status === "pending" && (
+                          <button
+                            onClick={() => handleEdit(request)}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                          >
+                            ✏️ Edit
+                          </button>
+                        )}
+
+                        {((user?.role !== "admin" && request.status === "pending") || user?.role === "admin") && (
+                          <button
+                            onClick={() => handleDelete(request._id)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                          >
+                            🗑️ Delete
+                          </button>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))

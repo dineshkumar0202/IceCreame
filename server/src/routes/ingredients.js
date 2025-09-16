@@ -1,44 +1,21 @@
 const express = require("express");
 const { authMiddleware, adminMiddleware } = require("../middleware/auth");
-const Branch = require("../models/Branch");
+const ingredientController = require("../controllers/ingredientController");
 const router = express.Router();
 
+// ✅ Create ingredient request (Users only)
+router.post("/", authMiddleware, ingredientController.request);
 
-// ✅ Create new branch (Admin only)
-router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const branch = new Branch(req.body);
-    await branch.save();
-    res.json(branch);
-  } catch (err) {
-    res.status(500).json({ error: "Error creating branch" });
-  }
-});
+// ✅ Get all ingredient requests (Admin + User - filtered by branch for users)
+router.get("/", authMiddleware, ingredientController.list);
 
-// ✅ Update branch (Admin only)
-router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const branch = await Branch.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(branch);
-  } catch (err) {
-    res.status(500).json({ error: "Error updating branch" });
-  }
-});
+// ✅ Update ingredient request (Users can update their own, Admins can update any)
+router.put("/:id", authMiddleware, ingredientController.update);
 
-// ✅ Delete branch (Admin only)
-router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    await Branch.findByIdAndDelete(req.params.id);
-    res.json({ message: "Branch deleted" });
-  } catch (err) {
-    res.status(500).json({ error: "Error deleting branch" });
-  }
-});
+// ✅ Update ingredient request status (Admin only)
+router.patch("/:id", authMiddleware, adminMiddleware, ingredientController.updateStatus);
 
-// ✅ View all branches (Admin + User)
-router.get("/", authMiddleware, async (req, res) => {
-  const branches = await Branch.find();
-  res.json(branches);
-});
+// ✅ Delete ingredient request (Users can delete their own, Admins can delete any)
+router.delete("/:id", authMiddleware, ingredientController.delete);
 
 module.exports = router;
