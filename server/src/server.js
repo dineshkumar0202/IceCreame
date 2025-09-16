@@ -26,7 +26,12 @@ app.use((err, req, res, next) => {
 
 // Connect DB
 connectDB().catch(err => {
-  console.error('Failed to connect to MongoDB:', err);
+  console.error('❌ Failed to connect to MongoDB:', err.message);
+  console.log('\n🔧 Setup Instructions:');
+  console.log('1. Install MongoDB: sudo apt install mongodb');
+  console.log('2. Start MongoDB: sudo systemctl start mongodb');
+  console.log('3. Or use MongoDB Atlas: https://cloud.mongodb.com/');
+  console.log('4. Update MONGO_URI in .env file\n');
   process.exit(1);
 });
 
