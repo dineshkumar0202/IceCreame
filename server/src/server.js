@@ -2,7 +2,7 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
 const app = express();
@@ -35,7 +35,7 @@ connectDB().catch(err => {
   process.exit(1);
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Added error handling for server startup
 const server = app.listen(PORT, () => {
