@@ -15,14 +15,14 @@ exports.register = async (req, res) => {
     const u = new User({ 
       username, 
       password: hashed, 
-      role: 'branch', // Default role for new users
+      role: 'branch',
       branch: branch || 'New Branch' 
     });
     await u.save();
     
     // Generate JWT token
     const token = jwt.sign(
-      { id: u._id, role: u.role, branch: u.branch },
+      { id: u._id, role: u.role, branch: u.branch, username: u.username },
       process.env.JWT_SECRET || "fallback-secret",
       { expiresIn: "1d" }
     );
@@ -47,7 +47,7 @@ exports.login = async (req, res) => {
     const ok = await bcrypt.compare(password, u.password);
     if (!ok) return res.status(400).json({ message: "Invalid credentials" });
     const token = jwt.sign(
-      { id: u._id, role: u.role, branch: u.branch },
+      { id: u._id, role: u.role, branch: u.branch, username: u.username },
       process.env.JWT_SECRET || "fallback-secret",
       { expiresIn: "1d" }
     );

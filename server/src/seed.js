@@ -39,9 +39,9 @@ connectDB().then(async () => {
 
   // Create ingredient requests
   const requests = [
-    { branch: 'New Bus Stand', city: 'Salem', flavor: 'Chocolate', ingredient: 'Cocoa powder', qty: 10, status: 'pending', date: new Date() },
-    { branch: 'Hasthampatti', city: 'Salem', flavor: 'Vanilla', ingredient: 'Vanilla extract', qty: 5, status: 'approved', date: new Date() },
-    { branch: 'Chennai Central', city: 'Chennai', flavor: 'Strawberry', ingredient: 'Strawberry flavor', qty: 8, status: 'pending', date: new Date() }
+    { branch: 'New Bus Stand', city: 'Salem', flavor: 'Chocolate', ingredient: 'Cocoa powder', qty: 10, status: 'pending', requestedBy: 'busstand', date: new Date() },
+    { branch: 'Hasthampatti', city: 'Salem', flavor: 'Vanilla', ingredient: 'Vanilla extract', qty: 5, status: 'approved', requestedBy: 'hasthampatti', date: new Date() },
+    { branch: 'Chennai Central', city: 'Chennai', flavor: 'Strawberry', ingredient: 'Strawberry flavor', qty: 8, status: 'pending', requestedBy: 'chennai', date: new Date() }
   ];
   await Req.insertMany(requests);
   console.log('🥛 Created ingredient requests');
