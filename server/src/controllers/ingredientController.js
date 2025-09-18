@@ -1,13 +1,28 @@
 const Req = require('../models/IngredientRequest');
+const Branch = require('../models/Branch');
+
+function isObjectIdLike(value) {
+  return typeof value === 'string' && /^[a-fA-F0-9]{24}$/.test(value);
+}
+
+async function resolveBranchName(possibleIdOrName) {
+  if (isObjectIdLike(possibleIdOrName)) {
+    const branchDoc = await Branch.findById(possibleIdOrName).lean();
+    return branchDoc?.name || possibleIdOrName;
+  }
+  return possibleIdOrName;
+}
 
 exports.request = async (req, res) => {
   try {
+    // Determine branch name from user or body (resolve ObjectId to name if needed)
+    const branchName = await resolveBranchName(req.user.branch || req.body.branch);
+
     // Add the requesting user's information to the request
     const requestData = {
       ...req.body,
       requestedBy: req.user.username || req.user.email,
-      // If user has a branch, use it; otherwise use the branch from request body
-      branch: req.user.branch || req.body.branch
+      branch: branchName
     };
 
     console.log('Creating ingredient request:', requestData);
@@ -27,10 +42,9 @@ exports.request = async (req, res) => {
 exports.list = async (req, res) => {
   try {
     let query = {};
-    
-    // If user is not admin, filter by their branch
+    // If user is not admin, filter by their branch (resolve id -> name)
     if (req.user.role !== 'admin') {
-      query.branch = req.user.branch;
+      query.branch = await resolveBranchName(req.user.branch);
     }
     
     console.log('Fetching ingredient requests with query:', query);
@@ -56,7 +70,8 @@ exports.update = async (req, res) => {
       if (!existingRequest) {
         return res.status(404).json({ message: 'Ingredient request not found' });
       }
-      if (existingRequest.branch !== req.user.branch) {
+      const userBranchName = await resolveBranchName(req.user.branch);
+      if (existingRequest.branch !== userBranchName) {
         return res.status(403).json({ message: 'Not authorized to update this request' });
       }
     }
@@ -113,7 +128,8 @@ exports.delete = async (req, res) => {
       if (!existingRequest) {
         return res.status(404).json({ message: 'Ingredient request not found' });
       }
-      if (existingRequest.branch !== req.user.branch) {
+      const userBranchName = await resolveBranchName(req.user.branch);
+      if (existingRequest.branch !== userBranchName) {
         return res.status(403).json({ message: 'Not authorized to delete this request' });
       }
     }
