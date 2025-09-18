@@ -1,13 +1,9 @@
 import React from 'react';
-// import HomeImage from '../images/home.png';
 
 export default function NotFound() {
   return (
     <div 
       className="page-background flex items-center justify-center"
-      style={{
-        '--page-bg-image': `url(${HomeImage})`
-      }}
     >
       {/* Content */}
       <div className="page-content text-center">
