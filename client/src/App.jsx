@@ -1,17 +1,17 @@
 import React from "react";
-import { BrowserRouter } from 'react-router-dom';
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext.jsx";
-import Navbar from "./components/Navbar.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import AdminPage  from "./pages/AdminHome.jsx";
-import UserHome from "./pages/UserHome.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import Branches from "./pages/Branches.jsx";
-import Sales from "./pages/Sales.jsx";
-import IngredientsPage  from "./pages/Ingredients.jsx";
+import { useAuth } from "./context/AuthContext";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminHome from "./pages/AdminHome";
+import UserHome from "./pages/UserHome";
+import Dashboard from "./pages/Dashboard";
+import Branches from "./pages/Branches";
+import Sales from "./pages/Sales";
+import Ingredients from "./pages/Ingredients";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import UserBranches from "./pages/UserBranches";
 
 export default function App() {
   const { user } = useAuth();
@@ -25,7 +25,7 @@ export default function App() {
             path="/"
             element={
               <ProtectedRoute>
-                {user?.role === 'admin' ? <AdminPage  /> : <UserHome />}
+                {user?.role === "admin" ? <AdminHome /> : <UserHome />}
               </ProtectedRoute>
             }
           />
@@ -57,16 +57,32 @@ export default function App() {
             path="/ingredients"
             element={
               <ProtectedRoute>
-                <IngredientsPage />
+                <Ingredients />
               </ProtectedRoute>
             }
           />
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to="/" replace /> : <Login />} 
+          <Route
+            path="/user-branches"
+            element={
+              <ProtectedRoute>
+                <UserBranches />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route
+            path="/user-sales"
+            element={
+              <ProtectedRoute>
+                <UserSales />
+              </ProtectedRoute>
+            }
+          /> */}
+
+          <Route
+            path="/login"
+            element={user ? <Navigate to="/" replace /> : <Login />}
           />
           <Route path="*" element={<NotFound />} />
-          
         </Routes>
       </div>
     </div>

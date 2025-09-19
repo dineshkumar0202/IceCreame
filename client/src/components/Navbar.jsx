@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -8,43 +8,40 @@ export default function Navbar() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const getNavItems = () => {
     if (!user) return [];
-    
+
     if (user.role === 'admin') {
       return [
         { path: '/', label: 'Dashboard', icon: '📊' },
-        { path: '/branches', label: 'Branches', icon: '🏪' },
+        { path: '/branches', label: 'Manage Branches', icon: '🏪' },
         { path: '/sales', label: 'Sales', icon: '💰' },
         { path: '/ingredients', label: 'Ingredients', icon: '🥛' }
       ];
     } else {
       return [
         { path: '/', label: 'Home', icon: '🏠' },
-        { path: '/branches', label: 'Branches', icon: '🏪' },
+        { path: '/user-branches', label: 'Our Branches', icon: '🏪' },
         { path: '/sales', label: 'Sales', icon: '💰' },
         { path: '/ingredients', label: 'Ingredients', icon: '🥛' }
+
       ];
     }
   };
 
-    
   const navItems = getNavItems();
+
   return (
     <nav className="bg-gradient-to-r from-yellow-500 to-pink-500 shadow-xl backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
             <div className="text-3xl animate-wave">🍦</div>
             <h1 className="text-white text-2xl font-bold tracking-wide">
               Ice Cream Franchise
@@ -54,15 +51,15 @@ export default function Navbar() {
                 {user.role === 'admin' ? 'Admin' : 'User'}
               </span>
             )}
-          </Link>
+          </div>
 
           {/* Desktop Navigation */}
           {user && (
             <div className="hidden md:flex space-x-1">
               {navItems.map((item) => (
-                <Link
+                <button
                   key={item.path}
-                  to={item.path}
+                  onClick={() => navigate(item.path)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                     location.pathname === item.path
                       ? 'bg-white bg-opacity-30 text-white shadow-lg'
@@ -71,7 +68,7 @@ export default function Navbar() {
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.label}
-                </Link>
+                </button>
               ))}
             </div>
           )}
@@ -84,11 +81,17 @@ export default function Navbar() {
                   <div className="text-white text-sm">
                     <div className="font-semibold">Welcome, Admin!</div>
                     <div className="text-xs opacity-80">Franchise Manager</div>
+                    <span className="text-2xl animate-float">🍦</span>
                   </div>
                 ) : (
                   <div className="text-white text-sm">
-                    <div className="font-semibold">Welcome, {user.username}!</div>
-                    <div className="text-xs opacity-80">{user.branch}</div>
+                    <div className="font-semibold">
+                      Welcome, {user.username || 'User'}!
+                    </div>
+                    <div className="text-xs opacity-80">
+                      {user.branch || 'Branch'}
+                    </div>
+                    <span className="text-lg animate-float">👋</span>
                   </div>
                 )}
                 <button
@@ -99,12 +102,12 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
+              <button
+                onClick={() => navigate('/login')}
                 className="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Login
-              </Link>
+              </button>
             )}
 
             {/* Mobile menu button */}
@@ -126,10 +129,12 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-white border-opacity-20">
             <div className="flex flex-col space-y-2">
               {navItems.map((item) => (
-                <Link
+                <button
                   key={item.path}
-                  to={item.path}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsMenuOpen(false);
+                  }}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
                     location.pathname === item.path
                       ? 'bg-white bg-opacity-30 text-white'
@@ -138,7 +143,7 @@ export default function Navbar() {
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.label}
-                </Link>
+                </button>
               ))}
             </div>
           </div>

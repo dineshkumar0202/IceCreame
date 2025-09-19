@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from "react";
-import {
-  getBranches,
-  createBranch,
-  updateBranch,
-  deleteBranch,
-} from "../services/branchService";
-import { useAuth } from "../context/AuthContext";
+import React, { useEffect, useState } from 'react';
+import { getBranches, createBranch, updateBranch, deleteBranch } from '../services/branchService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Branches() {
   const { user } = useAuth();
   const [branches, setBranches] = useState([]);
-  const [form, setForm] = useState({
-    name: "",
-    city: "",
-    area: "",
-    address: "",
-    phone: "",
-    manager: "",
-  });
+  const [form, setForm] = useState({ name: '', city: '', area: '' });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -32,7 +20,7 @@ export default function Branches() {
       const data = await getBranches();
       setBranches(data);
     } catch (error) {
-      console.error("Error fetching branches:", error);
+      console.error('Error fetching branches:', error);
     } finally {
       setLoading(false);
     }
@@ -50,107 +38,85 @@ export default function Branches() {
       } else {
         await createBranch(form);
       }
-      setForm({
-        name: "",
-        city: "",
-        area: "",
-        address: "",
-        phone: "",
-        manager: "",
-      });
+      setForm({ name: '', city: '', area: '' });
       setShowForm(false);
       await fetchBranches();
     } catch (error) {
-      console.error("Error saving branch:", error);
-      alert("Error saving branch");
+      console.error('Error saving branch:', error);
+      alert('Error saving branch');
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (branch) => {
-    setForm({
-      name: branch.name,
-      city: branch.city,
-      area: branch.area,
-      address: branch.address || "",
-      phone: branch.phone || "",
-      manager: branch.manager || "",
-    });
+    setForm({ name: branch.name, city: branch.city, area: branch.area });
     setEditingId(branch._id);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this branch?")) return;
+    if (!window.confirm('Are you sure you want to delete this branch?')) return;
 
     try {
       setLoading(true);
       await deleteBranch(id);
       await fetchBranches();
     } catch (error) {
-      console.error("Error deleting branch:", error);
-      alert("Error deleting branch");
+      console.error('Error deleting branch:', error);
+      alert('Error deleting branch');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setForm({ name: "", city: "", area: "" });
+    setForm({ name: '', city: '', area: '' });
     setEditingId(null);
     setShowForm(false);
   };
 
-  const filteredBranches =
-    user?.role === "branch"
-      ? branches.filter((branch) => branch.name === user.branch)
-      : branches;
+  const filteredBranches = user?.role === 'branch' 
+    ? branches.filter(branch => branch.name === user.branch)
+    : branches;
 
   return (
     <div className="h-full bg-gradient-to-br from-rose-50 to-pink-100 relative overflow-y-auto">
       {/* Background Decorations */}
-      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">
-        🏪
-      </div>
-      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">
-        🍦
-      </div>
-      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">
-        🏢
-      </div>
-      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">
-        🏬
-      </div>
-
+      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">🏪</div>
+      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">🍦</div>
+      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">🏢</div>
+      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">🏬</div>
+      
       <div className="container mx-auto px-6 py-8 relative z-10">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 flex items-center animate-fadeIn">
-              Branch Management{" "}
-              <span className="text-4xl animate-bounce ml-2">🏪</span>
+              Branch Management <span className="text-4xl animate-bounce ml-2">🏪</span>
             </h1>
             <p className="text-gray-600 mt-2 animate-fadeIn delay-200">
-              {user?.role === "admin"
-                ? "Manage all branches across the network"
-                : `Viewing branch: ${user?.branch || "your branch"}`}
+              {user?.role === 'admin' 
+                ? 'Manage all branches across the network' 
+                : `Viewing branch: ${user?.branch || 'your branch'}`
+              }
             </p>
           </div>
-          {user?.role === "admin" && (
+          {user?.role === 'admin' && (
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg animate-bounceIn"
             >
-              {showForm ? "Cancel" : "+ Add Branch"}
+              {showForm ? 'Cancel' : '+ Add Branch'}
             </button>
           )}
         </div>
+
         {/* Add/Edit Form - Admin Only */}
-        {showForm && user?.role === "admin" && (
+        {showForm && user?.role === 'admin' && (
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              {editingId ? "Edit Branch" : "Add New Branch"}
+              {editingId ? 'Edit Branch' : 'Add New Branch'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -194,46 +160,6 @@ export default function Branches() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter address"
-                  value={form.address}
-                  onChange={(e) =>
-                    setForm({ ...form, address: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter phone number"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Manager
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter manager name"
-                  value={form.manager}
-                  onChange={(e) =>
-                    setForm({ ...form, manager: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 text-black"
-                />
-              </div>
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
@@ -247,64 +173,10 @@ export default function Branches() {
                   disabled={loading}
                   className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
-                  {loading
-                    ? "Saving..."
-                    : editingId
-                    ? "Update Branch"
-                    : "Add Branch"}
+                  {loading ? 'Saving...' : (editingId ? 'Update Branch' : 'Add Branch')}
                 </button>
               </div>
             </form>
-          </div>
-        )}
-        {/* Branch Analytics - Admin Only */}
-        {user?.role === "admin" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">
-                    Total Branches
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {filteredBranches.length}
-                  </p>
-                </div>
-                <div className="text-4xl opacity-80">🏪</div>
-              </div>
-            </div>
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-medium">
-                    Cities Covered
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {
-                      new Set(filteredBranches.map((branch) => branch.city))
-                        .size
-                    }
-                  </p>
-                </div>
-                <div className="text-4xl opacity-80">🌆</div>
-              </div>
-            </div>
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">
-                    Areas Covered
-                  </p>
-                  <p className="text-3xl font-bold">
-                    {
-                      new Set(filteredBranches.map((branch) => branch.area))
-                        .size
-                    }
-                  </p>
-                </div>
-                <div className="text-4xl opacity-80">📍</div>
-              </div>
-            </div>
           </div>
         )}
 
@@ -312,31 +184,25 @@ export default function Branches() {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">
-              {user?.role === "admin"
-                ? "All Branches"
-                : `Your Branch: ${user?.branch}`}
+              {user?.role === 'admin' ? 'All Branches' : 'Your Branch'}
             </h3>
           </div>
-
-          <div className="divide-y divide-gray-200">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : filteredBranches.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🏪</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No Branches Found
-                </h3>
-                <p className="text-gray-600">
-                  {user?.role === "admin"
-                    ? "Add your first branch to get started!"
-                    : "No branch information available."}
-                </p>
-              </div>
-            ) : (
-              filteredBranches.map((branch, index) => (
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filteredBranches.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🏪</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Branches Found</h3>
+              <p className="text-gray-600">
+                {user?.role === 'admin' ? 'Add your first branch to get started!' : 'No branch information available.'}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {filteredBranches.map((branch, index) => (
                 <div
                   key={branch._id}
                   className="px-6 py-4 hover:bg-gray-50 transition-all duration-300 transform hover:scale-[1.02]"
@@ -348,25 +214,11 @@ export default function Branches() {
                         {branch.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">
-                          {branch.name}
-                        </h4>
-                        <p className="text-gray-600">
-                          {branch.city} - {branch.area}
-                        </p>
-                        {(branch.address || branch.phone || branch.manager) && (
-                          <div className="text-sm text-gray-500 mt-1">
-                            {branch.address && <div>{branch.address}</div>}
-                            <div>
-                              {branch.manager && `Manager: ${branch.manager}`}
-                              {branch.manager && branch.phone && " • "}
-                              {branch.phone && `Phone: ${branch.phone}`}
-                            </div>
-                          </div>
-                        )}
+                        <h4 className="text-lg font-semibold text-gray-900">{branch.name}</h4>
+                        <p className="text-gray-600">{branch.city} - {branch.area}</p>
                       </div>
                     </div>
-                    {user?.role === "admin" && (
+                    {user?.role === 'admin' && (
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(branch)}
@@ -384,9 +236,9 @@ export default function Branches() {
                     )}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

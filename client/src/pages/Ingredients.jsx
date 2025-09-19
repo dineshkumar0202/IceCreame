@@ -18,7 +18,7 @@ export default function Ingredients() {
     city: "",
     flavor: "",
     ingredient: "",
-    qty: 1,
+    qty: 0,
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -88,7 +88,7 @@ export default function Ingredients() {
         city: "",
         flavor: "",
         ingredient: "",
-        qty: 1,
+        qty: 0,
       });
       setShowForm(false);
       await fetchRequests();
@@ -146,7 +146,7 @@ export default function Ingredients() {
       city: "",
       flavor: "",
       ingredient: "",
-      qty: 1,
+      qty: 0,
     });
     setEditingId(null);
     setShowForm(false);

@@ -101,7 +101,7 @@ export default function Login() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all duration-300 text-black"
               required
-              minLength={isLogin ? undefined : 8}
+              minLength={8}
             />
           </div>
 
