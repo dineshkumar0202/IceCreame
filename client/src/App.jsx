@@ -1,11 +1,11 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
+import { useAuth, AuthProvider } from "./context/AuthContext"; // fixed import
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminHome from "./pages/AdminHome";
 import UserHome from "./pages/UserHome";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard"; // keep only one Dashboard
 import Branches from "./pages/Branches";
 import Sales from "./pages/Sales";
 import Ingredients from "./pages/Ingredients";
@@ -13,7 +13,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import UserBranches from "./pages/UserBranches";
 
-export default function App() {
+function AppContent() {
   const { user } = useAuth();
 
   return (
@@ -69,14 +69,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
-            path="/user-sales"
-            element={
-              <ProtectedRoute>
-                <UserSales />
-              </ProtectedRoute>
-            }
-          /> */}
 
           <Route
             path="/login"
@@ -86,5 +78,14 @@ export default function App() {
         </Routes>
       </div>
     </div>
+  );
+}
+
+// ✅ Wrap everything with AuthProvider
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

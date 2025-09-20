@@ -25,14 +25,32 @@ export default function Ingredients() {
   const [showForm, setShowForm] = useState(false);
 
   const flavors = [
-    "Vanilla", "Chocolate", "Strawberry", "Mint", "Cookies & Cream", 
-    "Rocky Road", "Neapolitan", "Pistachio", "Mango", "Coconut"
+    "Vanilla",
+    "Chocolate",
+    "Strawberry",
+    "Mint",
+    "Cookies & Cream",
+    "Rocky Road",
+    "Neapolitan",
+    "Pistachio",
+    "Mango",
+    "Coconut",
   ];
 
   const ingredients = [
-    "Milk", "Cream", "Sugar", "Vanilla Extract", "Cocoa Powder", 
-    "Strawberry Puree", "Mint Leaves", "Cookie Pieces", "Nuts", 
-    "Chocolate Chips", "Food Coloring", "Stabilizers", "Eggs"
+    "Milk",
+    "Cream",
+    "Sugar",
+    "Vanilla Extract",
+    "Cocoa Powder",
+    "Strawberry Puree",
+    "Mint Leaves",
+    "Cookie Pieces",
+    "Nuts",
+    "Chocolate Chips",
+    "Food Coloring",
+    "Stabilizers",
+    "Eggs",
   ];
 
   useEffect(() => {
@@ -48,7 +66,10 @@ export default function Ingredients() {
       setRequests(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching ingredient requests:", error);
-      alert("Error fetching ingredient requests: " + (error.response?.data?.message || error.message));
+      alert(
+        "Error fetching ingredient requests: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -58,47 +79,57 @@ export default function Ingredients() {
     try {
       const data = await getBranches();
       setBranches(Array.isArray(data) ? data : []);
-      
+
       // Set default branch for branch users
       if (user?.role === "branch" && user?.branch) {
-        setForm(prev => ({ ...prev, branch: user.branch }));
+        setForm((prev) => ({ ...prev, branch: user.branch }));
       }
     } catch (error) {
       console.error("Error fetching branches:", error);
     }
   };
 
+  
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.branch || !form.city || !form.flavor || !form.ingredient || !form.qty) {
-      alert("Please fill in all fields");
-      return;
+  e.preventDefault();
+  if (!form.branch || !form.city || !form.flavor || !form.ingredient || !form.qty) {
+    alert("Please fill in all fields");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const requestData = {
+      ...form,
+      requestedBy: user?.username || "Unknown",  // 👈 Save requester
+      date: new Date().toISOString(),           // 👈 Save timestamp
+      status: "pending",                        // 👈 Always pending at first
+    };
+
+    if (editingId) {
+      await updateRequest(editingId, requestData);
+      setEditingId(null);
+    } else {
+      await requestIngredient(requestData);
     }
 
-    try {
-      setLoading(true);
-      if (editingId) {
-        await updateRequest(editingId, form);
-        setEditingId(null);
-      } else {
-        await requestIngredient(form);
-      }
-      setForm({
-        branch: user?.role === "branch" ? user.branch : "",
-        city: "",
-        flavor: "",
-        ingredient: "",
-        qty: 0,
-      });
-      setShowForm(false);
-      await fetchRequests();
-    } catch (error) {
-      console.error("Error saving ingredient request:", error);
-      alert("Error saving ingredient request: " + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
+    setForm({
+      branch: user?.role === "branch" ? user.branch : "",
+      city: "",
+      flavor: "",
+      ingredient: "",
+      qty: 0,
+    });
+    setShowForm(false);
+    await fetchRequests();
+  } catch (error) {
+    console.error("Error saving ingredient request:", error);
+    alert("Error saving ingredient request: " + (error.response?.data?.message || error.message));
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleStatusUpdate = async (id, status) => {
     try {
@@ -107,7 +138,10 @@ export default function Ingredients() {
       await fetchRequests();
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Error updating status: " + (error.response?.data?.message || error.message));
+      alert(
+        "Error updating status: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -126,7 +160,8 @@ export default function Ingredients() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this request?")) return;
+    if (!window.confirm("Are you sure you want to delete this request?"))
+      return;
 
     try {
       setLoading(true);
@@ -134,7 +169,10 @@ export default function Ingredients() {
       await fetchRequests();
     } catch (error) {
       console.error("Error deleting request:", error);
-      alert("Error deleting request: " + (error.response?.data?.message || error.message));
+      alert(
+        "Error deleting request: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -166,32 +204,47 @@ export default function Ingredients() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "approved": return "bg-green-100 text-green-800";
-      case "rejected": return "bg-red-100 text-red-800";
-      default: return "bg-yellow-100 text-yellow-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-yellow-100 text-yellow-800";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "approved": return "✅";
-      case "rejected": return "❌";
-      default: return "⏳";
+      case "approved":
+        return "✅";
+      case "rejected":
+        return "❌";
+      default:
+        return "⏳";
     }
   };
 
   return (
     <div className="h-full bg-gradient-to-br from-orange-50 to-amber-100 relative overflow-y-auto">
-      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">🧊</div>
-      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">🍦</div>
-      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">🥛</div>
-      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">🍓</div>
+      <div className="absolute top-10 left-10 text-6xl opacity-10 animate-float">
+        🧊
+      </div>
+      <div className="absolute top-32 right-20 text-4xl opacity-15 animate-wave">
+        🍦
+      </div>
+      <div className="absolute bottom-40 left-20 text-5xl opacity-12 animate-float">
+        🥛
+      </div>
+      <div className="absolute bottom-20 right-10 text-3xl opacity-10 animate-wave">
+        🍓
+      </div>
 
       <div className="container mx-auto px-6 py-8 relative z-10">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 flex items-center animate-fadeIn">
-              Ingredient Requests <span className="text-4xl animate-bounce ml-2">🧊</span>
+              Ingredient Requests{" "}
+              <span className="text-4xl animate-bounce ml-2">🧊</span>
             </h1>
             <p className="text-gray-600 mt-2 animate-fadeIn delay-200">
               {user?.role === "admin"
@@ -218,10 +271,14 @@ export default function Ingredients() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Branch</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Branch
+                  </label>
                   <select
                     value={form.branch}
-                    onChange={(e) => setForm({ ...form, branch: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, branch: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
                     disabled={user?.role === "branch"}
@@ -235,7 +292,9 @@ export default function Ingredients() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
                   <input
                     type="text"
                     placeholder="Enter city"
@@ -249,10 +308,14 @@ export default function Ingredients() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Flavor</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Flavor
+                  </label>
                   <select
                     value={form.flavor}
-                    onChange={(e) => setForm({ ...form, flavor: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, flavor: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
                   >
@@ -265,10 +328,14 @@ export default function Ingredients() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ingredient</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ingredient
+                  </label>
                   <select
                     value={form.ingredient}
-                    onChange={(e) => setForm({ ...form, ingredient: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, ingredient: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                     required
                   >
@@ -283,13 +350,17 @@ export default function Ingredients() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity (kg/liters)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity (kg/liters)
+                </label>
                 <input
                   type="number"
                   min="1"
                   placeholder="Enter quantity"
                   value={form.qty}
-                  onChange={(e) => setForm({ ...form, qty: parseInt(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    setForm({ ...form, qty: parseInt(e.target.value) || 1 })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                   required
                 />
@@ -308,7 +379,11 @@ export default function Ingredients() {
                   disabled={loading}
                   className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : editingId ? "Update Request" : "Submit Request"}
+                  {loading
+                    ? "Saving..."
+                    : editingId
+                    ? "Update Request"
+                    : "Submit Request"}
                 </button>
               </div>
             </form>
@@ -320,7 +395,9 @@ export default function Ingredients() {
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm font-medium">Total Requests</p>
+                <p className="text-blue-100 text-sm font-medium">
+                  Total Requests
+                </p>
                 <p className="text-3xl font-bold">{requests.length}</p>
               </div>
               <div className="text-4xl opacity-80">📋</div>
@@ -331,7 +408,9 @@ export default function Ingredients() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-yellow-100 text-sm font-medium">Pending</p>
-                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'pending').length}</p>
+                <p className="text-3xl font-bold">
+                  {requests.filter((r) => r.status === "pending").length}
+                </p>
               </div>
               <div className="text-4xl opacity-80">⏳</div>
             </div>
@@ -341,7 +420,9 @@ export default function Ingredients() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100 text-sm font-medium">Approved</p>
-                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'approved').length}</p>
+                <p className="text-3xl font-bold">
+                  {requests.filter((r) => r.status === "approved").length}
+                </p>
               </div>
               <div className="text-4xl opacity-80">✅</div>
             </div>
@@ -351,7 +432,9 @@ export default function Ingredients() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-red-100 text-sm font-medium">Rejected</p>
-                <p className="text-3xl font-bold">{requests.filter(r => r.status === 'rejected').length}</p>
+                <p className="text-3xl font-bold">
+                  {requests.filter((r) => r.status === "rejected").length}
+                </p>
               </div>
               <div className="text-4xl opacity-80">❌</div>
             </div>
@@ -361,7 +444,9 @@ export default function Ingredients() {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">
-              {user?.role === "admin" ? "All Ingredient Requests" : "Your Requests"}
+              {user?.role === "admin"
+                ? "All Ingredient Requests"
+                : "Your Requests"}
             </h3>
           </div>
 
@@ -373,9 +458,13 @@ export default function Ingredients() {
             ) : requests.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🧊</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Requests Found</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Requests Found
+                </h3>
                 <p className="text-gray-600">
-                  {user?.role === "admin" ? "No ingredient requests have been made yet." : "Create your first ingredient request!"}
+                  {user?.role === "admin"
+                    ? "No ingredient requests have been made yet."
+                    : "Create your first ingredient request!"}
                 </p>
               </div>
             ) : (
@@ -388,58 +477,79 @@ export default function Ingredients() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {request.ingredient.charAt(0).toUpperCase()}
+                        {(request.ingredient
+                          ? request.ingredient.charAt(0)
+                          : "?"
+                        ).toUpperCase()}
                       </div>
+
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900">
                           {request.ingredient} for {request.flavor}
                         </h4>
                         <p className="text-gray-600">
-                          {request.branch} - {request.city} • Qty: {request.qty} kg/L
+                          {request.branch} - {request.city} • Qty: {request.qty}{" "}
+                          kg/L
                         </p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
                           <span>Requested by: {request.requestedBy}</span>
                           <span>•</span>
-                          <span>{new Date(request.date).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(request.date).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
-                        {getStatusIcon(request.status)} {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                          request.status
+                        )}`}
+                      >
+                        {getStatusIcon(request.status)}{" "}
+                        {request.status.charAt(0).toUpperCase() +
+                          request.status.slice(1)}
                       </span>
 
                       <div className="flex space-x-2">
-                        {user?.role === "admin" && request.status === "pending" && (
-                          <>
-                            <button
-                              onClick={() => handleStatusUpdate(request._id, "approved")}
-                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                              disabled={loading}
-                            >
-                              ✅ Approve
-                            </button>
-                            <button
-                              onClick={() => handleStatusUpdate(request._id, "rejected")}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                              disabled={loading}
-                            >
-                              ❌ Reject
-                            </button>
-                          </>
-                        )}
+                        {user?.role === "admin" &&
+                          request.status === "pending" && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleStatusUpdate(request._id, "approved")
+                                }
+                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                                disabled={loading}
+                              >
+                                ✅ Approve
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleStatusUpdate(request._id, "rejected")
+                                }
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                                disabled={loading}
+                              >
+                                ❌ Reject
+                              </button>
+                            </>
+                          )}
 
-                        {user?.role !== "admin" && request.status === "pending" && (
-                          <button
-                            onClick={() => handleEdit(request)}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                          >
-                            ✏️ Edit
-                          </button>
-                        )}
+                        {user?.role !== "admin" &&
+                          request.status === "pending" && (
+                            <button
+                              onClick={() => handleEdit(request)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                            >
+                              ✏️ Edit
+                            </button>
+                          )}
 
-                        {((user?.role !== "admin" && request.status === "pending") || user?.role === "admin") && (
+                        {((user?.role !== "admin" &&
+                          request.status === "pending") ||
+                          user?.role === "admin") && (
                           <button
                             onClick={() => handleDelete(request._id)}
                             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-all duration-300 transform hover:scale-105"
